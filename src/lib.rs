@@ -6,7 +6,7 @@
 pub mod rayon;
 
 pub use paradis_core::{slice, IntoUnsyncAccess, UnsyncAccess};
-use std::{collections::HashSet, ops::Range};
+use std::ops::Range;
 
 pub unsafe trait DisjointIndices: Sync + Send {
     type Index: Copy;
@@ -27,68 +27,68 @@ unsafe impl DisjointIndices for Range<usize> {
     }
 }
 
-pub unsafe trait DisjointIndexSubsets {
-    type IndexSubset<'subset>;
+// pub unsafe trait DisjointIndexSubsets {
+//     type IndexSubset<'subset>;
 
-    fn num_subsets(&self) -> usize;
-    fn subset_len(&self, subset_index: usize) -> usize;
-    fn get_subset<'subset>(&self, subset_index: usize) -> Self::IndexSubset<'subset>;
-}
+//     fn num_subsets(&self) -> usize;
+//     fn subset_len(&self, subset_index: usize) -> usize;
+//     fn get_subset<'subset>(&self, subset_index: usize) -> Self::IndexSubset<'subset>;
+// }
 
-#[derive(Debug, Clone)]
-pub struct DisjointIndicesVec {
-    indices: Vec<usize>,
-    // max_idx: usize,
-}
+// #[derive(Debug, Clone)]
+// pub struct DisjointIndicesVec {
+//     indices: Vec<usize>,
+//     // max_idx: usize,
+// }
 
-#[derive(Debug)]
-pub struct NotDisjoint;
+// #[derive(Debug)]
+// pub struct NotDisjoint;
 
-impl DisjointIndicesVec {
-    pub fn try_from_index_iter<I>(iter: I) -> Result<Self, NotDisjoint>
-    where
-        I: IntoIterator<Item = usize>,
-    {
-        // Remove outer generic call to avoid excessive monomorphization
-        Self::try_from_index_iter_inner(iter.into_iter())
-    }
+// impl DisjointIndicesVec {
+//     pub fn try_from_index_iter<I>(iter: I) -> Result<Self, NotDisjoint>
+//     where
+//         I: IntoIterator<Item = usize>,
+//     {
+//         // Remove outer generic call to avoid excessive monomorphization
+//         Self::try_from_index_iter_inner(iter.into_iter())
+//     }
 
-    fn try_from_index_iter_inner<I>(iter: I) -> Result<Self, NotDisjoint>
-    where
-        I: Iterator<Item = usize>,
-    {
-        // let mut max_idx = 0;
-        // TODO: Use faster hash? And/or switch to bitvec for sufficiently large number of indices
-        let mut visited_indices = HashSet::new();
+//     fn try_from_index_iter_inner<I>(iter: I) -> Result<Self, NotDisjoint>
+//     where
+//         I: Iterator<Item = usize>,
+//     {
+//         // let mut max_idx = 0;
+//         // TODO: Use faster hash? And/or switch to bitvec for sufficiently large number of indices
+//         let mut visited_indices = HashSet::new();
 
-        let indices = iter
-            .map(|idx| {
-                // if idx > max_idx {
-                //     max_idx = idx;
-                // }
-                if visited_indices.insert(idx) {
-                    Ok(idx)
-                } else {
-                    Err(NotDisjoint)
-                }
-            })
-            .collect::<Result<Vec<_>, _>>()?;
+//         let indices = iter
+//             .map(|idx| {
+//                 // if idx > max_idx {
+//                 //     max_idx = idx;
+//                 // }
+//                 if visited_indices.insert(idx) {
+//                     Ok(idx)
+//                 } else {
+//                     Err(NotDisjoint)
+//                 }
+//             })
+//             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Self {
-            indices,
-            // max_idx,
-        })
-    }
-}
+//         Ok(Self {
+//             indices,
+//             // max_idx,
+//         })
+//     }
+// }
 
-unsafe impl DisjointIndices for DisjointIndicesVec {
-    type Index = usize;
+// unsafe impl DisjointIndices for DisjointIndicesVec {
+//     type Index = usize;
 
-    fn num_indices(&self) -> usize {
-        self.indices.len()
-    }
+//     fn num_indices(&self) -> usize {
+//         self.indices.len()
+//     }
 
-    unsafe fn get_unchecked(&self, i: usize) -> usize {
-        *self.indices.get_unchecked(i)
-    }
-}
+//     unsafe fn get_unchecked(&self, i: usize) -> usize {
+//         *self.indices.get_unchecked(i)
+//     }
+// }
