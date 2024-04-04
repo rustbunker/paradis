@@ -8,7 +8,7 @@ pub mod rayon;
 pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
 use std::ops::Range;
 
-pub unsafe trait DisjointIndices: Sync + Send {
+pub unsafe trait UniqueIndices: Sync + Send {
     type Index: Copy;
 
     unsafe fn get_unchecked(&self, i: usize) -> Self::Index;
@@ -19,14 +19,14 @@ pub unsafe trait DisjointIndices: Sync + Send {
         unsafe { self.get_unchecked(i) }
     }
 
-    fn combine_with_access<Access>(&self, access: Access) -> DisjointIndicesWithAccess<'_, Self, Access>
+    fn combine_with_access<Access>(&self, access: Access) -> UniqueIndicesWithAccess<'_, Self, Access>
     where
         Access: UnsyncAccess<Self::Index>,
         // TODO: Is this bound necessary? Do we want it? The alternative is to sprinkle
         // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
         Self: Sized
     {
-        DisjointIndicesWithAccess {
+        UniqueIndicesWithAccess {
             indices: self,
             access,
         }
@@ -34,14 +34,14 @@ pub unsafe trait DisjointIndices: Sync + Send {
 }
 
 #[derive(Debug)]
-pub struct DisjointIndicesWithAccess<'a, Indices, Access> {
+pub struct UniqueIndicesWithAccess<'a, Indices, Access> {
     indices: &'a Indices,
     access: Access
 }
 
-unsafe impl<'a, Indices, Access> UnsyncAccess<usize> for DisjointIndicesWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> UnsyncAccess<usize> for UniqueIndicesWithAccess<'a, Indices, Access>
 where
-    Indices: DisjointIndices,
+    Indices: UniqueIndices,
     Access: UnsyncAccess<Indices::Index>,
 {
     type Record = Access::Record;
@@ -77,9 +77,9 @@ where
     }
 }
 
-unsafe impl<'a, Indices, Access> LinearUnsyncAccess for DisjointIndicesWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> LinearUnsyncAccess for UniqueIndicesWithAccess<'a, Indices, Access>
 where
-    Indices: DisjointIndices,
+    Indices: UniqueIndices,
     Access: UnsyncAccess<Indices::Index>,
 {
     fn len(&self) -> usize {
@@ -87,7 +87,7 @@ where
     }
 }
 
-unsafe impl DisjointIndices for Range<usize> {
+unsafe impl UniqueIndices for Range<usize> {
     type Index = usize;
 
     unsafe fn get_unchecked(&self, i: usize) -> usize {

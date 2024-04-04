@@ -1,5 +1,5 @@
 use paradis::rayon::linear_unsync_access_par_iter;
-use paradis::{DisjointIndices, IntoUnsyncAccess};
+use paradis::{UniqueIndices, IntoUnsyncAccess};
 use rayon::iter::ParallelIterator;
 
 fn main() {
