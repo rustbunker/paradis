@@ -5,7 +5,7 @@
 #[cfg(feature = "rayon")]
 pub mod rayon;
 
-pub use paradis_core::{slice, IntoUnsyncAccess, UnsyncAccess, LinearUnsyncAccess};
+pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
 use std::ops::Range;
 
 pub unsafe trait DisjointIndices: Sync + Send {

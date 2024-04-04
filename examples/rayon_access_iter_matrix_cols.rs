@@ -1,9 +1,9 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::linear_unsync_access_par_iter;
 use paradis::UnsyncAccess;
+use paradis_core::LinearUnsyncAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
-use paradis_core::LinearUnsyncAccess;
 
 /// Facilitates (parallel) unsynchronized access to columns of a DMatrix
 pub struct DMatrixColUnsyncAccess<'a, T> {

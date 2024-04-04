@@ -1,21 +1,18 @@
-use crate::{IntoUnsyncAccess};
+use crate::IntoUnsyncAccess;
+use paradis_core::LinearUnsyncAccess;
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
-use paradis_core::LinearUnsyncAccess;
 
 #[derive(Debug)]
 pub struct LinearUnsyncAccessParIter<Access> {
     access: Access,
 }
 
-impl<Access> LinearUnsyncAccessParIter<Access>
-{
-    pub fn from_access<IntoAccess>(
-        access: IntoAccess
-    ) -> Self
+impl<Access> LinearUnsyncAccessParIter<Access> {
+    pub fn from_access<IntoAccess>(access: IntoAccess) -> Self
     where
-        IntoAccess: IntoUnsyncAccess<Access=Access>,
-        IntoAccess::Access: LinearUnsyncAccess
+        IntoAccess: IntoUnsyncAccess<Access = Access>,
+        IntoAccess::Access: LinearUnsyncAccess,
     {
         let access = access.into_unsync_access();
         Self { access }
@@ -27,7 +24,7 @@ pub fn linear_unsync_access_par_iter<IntoAccess>(
 ) -> LinearUnsyncAccessParIter<IntoAccess::Access>
 where
     IntoAccess: IntoUnsyncAccess,
-    IntoAccess::Access: LinearUnsyncAccess
+    IntoAccess::Access: LinearUnsyncAccess,
 {
     LinearUnsyncAccessParIter::from_access(access)
 }
@@ -40,7 +37,7 @@ struct AccessProducerMut<Access> {
 
 impl<Access> Iterator for AccessProducerMut<Access>
 where
-    Access: LinearUnsyncAccess
+    Access: LinearUnsyncAccess,
 {
     type Item = Access::RecordMut;
 
@@ -55,15 +52,11 @@ where
     }
 }
 
-impl<Access> ExactSizeIterator for AccessProducerMut<Access>
-    where
-        Access: LinearUnsyncAccess
-{
-}
+impl<Access> ExactSizeIterator for AccessProducerMut<Access> where Access: LinearUnsyncAccess {}
 
 impl<Access> DoubleEndedIterator for AccessProducerMut<Access>
 where
-    Access: LinearUnsyncAccess
+    Access: LinearUnsyncAccess,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         // TODO: Need to test this impl
@@ -79,7 +72,7 @@ where
 
 impl<Access> Producer for AccessProducerMut<Access>
 where
-    Access: LinearUnsyncAccess
+    Access: LinearUnsyncAccess,
 {
     type Item = Access::RecordMut;
     type IntoIter = Self;
