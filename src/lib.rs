@@ -13,17 +13,89 @@ pub unsafe trait DisjointIndices: Sync + Send {
 
     unsafe fn get_unchecked(&self, i: usize) -> Self::Index;
     fn num_indices(&self) -> usize;
+
+    fn get(&self, i: usize) -> Self::Index {
+        assert!(i < self.num_indices(), "Index must be in bounds");
+        unsafe { self.get_unchecked(i) }
+    }
+
+    fn combine_with_access<Access>(&self, access: Access) -> DisjointIndicesWithAccess<'_, Self, Access>
+    where
+        Access: UnsyncAccess<Self::Index>,
+        // TODO: Is this bound necessary? Do we want it? The alternative is to sprinkle
+        // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
+        Self: Sized
+    {
+        DisjointIndicesWithAccess {
+            indices: self,
+            access,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct DisjointIndicesWithAccess<'a, Indices, Access> {
+    indices: &'a Indices,
+    access: Access
+}
+
+unsafe impl<'a, Indices, Access> UnsyncAccess<usize> for DisjointIndicesWithAccess<'a, Indices, Access>
+where
+    Indices: DisjointIndices,
+    Access: UnsyncAccess<Indices::Index>,
+{
+    type Record = Access::Record;
+    type RecordMut = Access::RecordMut;
+
+    #[inline(always)]
+    unsafe fn clone_access(&self) -> Self {
+        Self {
+            indices: self.indices,
+            access: unsafe { self.access.clone_access() },
+        }
+    }
+
+    #[inline(always)]
+    fn in_bounds(&self, index: usize) -> bool {
+        let in_bounds_in_index_list = index < self.indices.num_indices();
+        if in_bounds_in_index_list {
+            let index = self.indices.get(index);
+            self.access.in_bounds(index)
+        } else {
+            false
+        }
+    }
+
+    #[inline(always)]
+    unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
+        self.access.get_unsync_unchecked(self.indices.get(index))
+    }
+
+    #[inline(always)]
+    unsafe fn get_unsync_unchecked_mut(&self, index: usize) -> Self::RecordMut {
+        self.access.get_unsync_unchecked_mut(self.indices.get(index))
+    }
+}
+
+unsafe impl<'a, Indices, Access> LinearUnsyncAccess for DisjointIndicesWithAccess<'a, Indices, Access>
+where
+    Indices: DisjointIndices,
+    Access: UnsyncAccess<Indices::Index>,
+{
+    fn len(&self) -> usize {
+        self.indices.num_indices()
+    }
 }
 
 unsafe impl DisjointIndices for Range<usize> {
     type Index = usize;
 
-    fn num_indices(&self) -> usize {
-        self.end.saturating_sub(self.start)
-    }
-
     unsafe fn get_unchecked(&self, i: usize) -> usize {
         self.start + i
+    }
+
+    fn num_indices(&self) -> usize {
+        self.end.saturating_sub(self.start)
     }
 }
 
