@@ -1,5 +1,5 @@
 //! Core primitives for slices.
-use crate::{IntoUnsyncAccess, UnsyncAccess};
+use crate::{IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
 use std::marker::PhantomData;
 
 #[derive(Debug)]
@@ -50,5 +50,11 @@ impl<'a, T: Sync + Send> IntoUnsyncAccess<usize> for &'a mut [T] {
             len: self.len(),
             marker: PhantomData,
         }
+    }
+}
+
+unsafe impl<'a, T: Sync + Send> LinearUnsyncAccess for UnsyncSliceAccess<'a, T> {
+    fn len(&self) -> usize {
+        self.len
     }
 }

@@ -103,3 +103,13 @@ impl<Index: Copy, Access: UnsyncAccess<Index>> IntoUnsyncAccess<Index> for Acces
         self
     }
 }
+
+/// An unsynchronized access to an array-like structure, indexed by `usize`.
+pub unsafe trait LinearUnsyncAccess: UnsyncAccess<usize> {
+    /// The number of accessible records.
+    ///
+    /// An implementor must ensure that this length never changes. In other words,
+    /// once an access is obtained, the size of the collection must never not change
+    /// while an access is active.
+    fn len(&self) -> usize;
+}

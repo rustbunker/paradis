@@ -1,8 +1,9 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
-use paradis::rayon::disjoint_indices_par_iter;
+use paradis::rayon::linear_unsync_access_par_iter;
 use paradis::UnsyncAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
+use paradis_core::LinearUnsyncAccess;
 
 /// Facilitates (parallel) unsynchronized access to columns of a DMatrix
 pub struct DMatrixColUnsyncAccess<'a, T> {
@@ -66,14 +67,23 @@ unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
     }
 }
 
+unsafe impl<'a, T: Scalar> LinearUnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
+    fn len(&self) -> usize {
+        self.cols
+    }
+}
+
 fn main() {
     let m = 100;
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 2.0);
     let col_access = DMatrixColUnsyncAccess::from_matrix_mut(&mut matrix);
-    let indices = 0..n;
 
-    disjoint_indices_par_iter(col_access, indices).for_each(|mut col| {
+    // TODO: Combine with disjoint index access to show that we can use this to access a subset
+    // of indices
+    // let indices = 0..n;
+
+    linear_unsync_access_par_iter(col_access).for_each(|mut col| {
         assert_eq!(col.nrows(), m);
         assert_eq!(col.ncols(), 1);
         col *= 2.0;

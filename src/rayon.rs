@@ -1,50 +1,52 @@
-use crate::{DisjointIndices, IntoUnsyncAccess, UnsyncAccess};
+use crate::{IntoUnsyncAccess};
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
+use paradis_core::LinearUnsyncAccess;
 
 #[derive(Debug)]
-pub struct UnsyncAccessParIter<Access, Indices> {
+pub struct LinearUnsyncAccessParIter<Access> {
     access: Access,
-    indices: Indices,
 }
 
-impl<Access, Indices> UnsyncAccessParIter<Access, Indices> {
-    pub fn from_access_and_indices(
-        into_access: impl IntoUnsyncAccess<Access = Access>,
-        indices: Indices,
-    ) -> Self {
-        let access = into_access.into_unsync_access();
-        Self { access, indices }
+impl<Access> LinearUnsyncAccessParIter<Access>
+{
+    pub fn from_access<IntoAccess>(
+        access: IntoAccess
+    ) -> Self
+    where
+        IntoAccess: IntoUnsyncAccess<Access=Access>,
+        IntoAccess::Access: LinearUnsyncAccess
+    {
+        let access = access.into_unsync_access();
+        Self { access }
     }
 }
 
-pub fn disjoint_indices_par_iter<Access, Indices>(
-    access: impl IntoUnsyncAccess<Access = Access>,
-    indices: Indices,
-) -> UnsyncAccessParIter<Access, Indices> {
-    UnsyncAccessParIter::from_access_and_indices(access, indices)
+pub fn linear_unsync_access_par_iter<IntoAccess>(
+    access: IntoAccess,
+) -> LinearUnsyncAccessParIter<IntoAccess::Access>
+where
+    IntoAccess: IntoUnsyncAccess,
+    IntoAccess::Access: LinearUnsyncAccess
+{
+    LinearUnsyncAccessParIter::from_access(access)
 }
 
-struct AccessProducerMut<'a, Access, Indices> {
+struct AccessProducerMut<Access> {
     access: Access,
-    indices: &'a Indices,
     start_idx: usize,
     end_idx: usize,
 }
 
-impl<'a, Access, Indices> Iterator for AccessProducerMut<'a, Access, Indices>
+impl<Access> Iterator for AccessProducerMut<Access>
 where
-    Access: UnsyncAccess<Indices::Index>,
-    Indices: DisjointIndices,
+    Access: LinearUnsyncAccess
 {
     type Item = Access::RecordMut;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.start_idx < self.end_idx {
-            let item = unsafe {
-                let index = self.indices.get_unchecked(self.start_idx);
-                self.access.get_unsync_mut(index)
-            };
+            let item = unsafe { self.access.get_unsync_mut(self.start_idx) };
             self.start_idx += 1;
             Some(item)
         } else {
@@ -53,26 +55,21 @@ where
     }
 }
 
-impl<'a, Access, Indices> ExactSizeIterator for AccessProducerMut<'a, Access, Indices>
-where
-    Access: UnsyncAccess<Indices::Index>,
-    Indices: DisjointIndices,
+impl<Access> ExactSizeIterator for AccessProducerMut<Access>
+    where
+        Access: LinearUnsyncAccess
 {
 }
 
-impl<'a, Access, Indices> DoubleEndedIterator for AccessProducerMut<'a, Access, Indices>
+impl<Access> DoubleEndedIterator for AccessProducerMut<Access>
 where
-    Access: UnsyncAccess<Indices::Index>,
-    Indices: DisjointIndices,
+    Access: LinearUnsyncAccess
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         // TODO: Need to test this impl
         if self.end_idx > self.start_idx {
             self.end_idx -= 1;
-            let item = unsafe {
-                let index = self.indices.get_unchecked(self.end_idx);
-                self.access.get_unsync_mut(index)
-            };
+            let item = unsafe { self.access.get_unsync_mut(self.end_idx) };
             Some(item)
         } else {
             None
@@ -80,10 +77,9 @@ where
     }
 }
 
-impl<'a, Access, Indices> Producer for AccessProducerMut<'a, Access, Indices>
+impl<Access> Producer for AccessProducerMut<Access>
 where
-    Access: UnsyncAccess<Indices::Index>,
-    Indices: DisjointIndices,
+    Access: LinearUnsyncAccess
 {
     type Item = Access::RecordMut;
     type IntoIter = Self;
@@ -91,7 +87,6 @@ where
     fn into_iter(self) -> Self::IntoIter {
         AccessProducerMut {
             access: self.access,
-            indices: self.indices,
             start_idx: self.start_idx,
             end_idx: self.end_idx,
         }
@@ -103,13 +98,11 @@ where
         // but they work on non-overlapping index sets
         let left = Self {
             access: unsafe { self.access.clone_access() },
-            indices: self.indices,
             start_idx: self.start_idx,
             end_idx: self.start_idx + index,
         };
         let right = Self {
             access: self.access,
-            indices: self.indices,
             start_idx: left.end_idx,
             end_idx: self.end_idx,
         };
@@ -117,11 +110,10 @@ where
     }
 }
 
-impl<Access, Indices> ParallelIterator for UnsyncAccessParIter<Access, Indices>
+impl<Access> ParallelIterator for LinearUnsyncAccessParIter<Access>
 where
-    Access: UnsyncAccess<Indices::Index>,
+    Access: LinearUnsyncAccess,
     Access::RecordMut: Send,
-    Indices: DisjointIndices,
 {
     type Item = Access::RecordMut;
 
@@ -133,18 +125,17 @@ where
     }
 
     fn opt_len(&self) -> Option<usize> {
-        Some(self.indices.num_indices())
+        Some(self.access.len())
     }
 }
 
-impl<Access, Indices> IndexedParallelIterator for UnsyncAccessParIter<Access, Indices>
+impl<Access> IndexedParallelIterator for LinearUnsyncAccessParIter<Access>
 where
-    Access: UnsyncAccess<Indices::Index>,
+    Access: LinearUnsyncAccess,
     Access::RecordMut: Send,
-    Indices: DisjointIndices,
 {
     fn len(&self) -> usize {
-        self.indices.num_indices()
+        self.access.len()
     }
 
     fn drive<C: Consumer<Self::Item>>(self, consumer: C) -> C::Result {
@@ -155,9 +146,8 @@ where
         let access = self.access;
         callback.callback(AccessProducerMut {
             start_idx: 0,
-            end_idx: self.indices.num_indices(),
+            end_idx: access.len(),
             access,
-            indices: &self.indices,
         })
     }
 }
