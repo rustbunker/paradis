@@ -20,18 +20,19 @@ pub unsafe trait UniqueIndices: Sync + Send {
         assert!(i < self.num_indices(), "Index must be in bounds");
         unsafe { self.get_unchecked(i) }
     }
+}
 
-    fn combine_with_access<Access>(&self, access: Access) -> UniqueIndicesWithAccess<'_, Self, Access>
-    where
-        Access: UnsyncAccess<Self::Index>,
-        // TODO: Is this bound necessary? Do we want it? The alternative is to sprinkle
-        // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
-        Self: Sized
-    {
-        UniqueIndicesWithAccess {
-            indices: self,
-            access,
-        }
+pub fn compose_access_with_indices<IntoAccess, Indices>(access: IntoAccess, indices: &Indices)
+    -> UniqueIndicesWithAccess<'_, Indices, IntoAccess::Access>
+where
+    // TODO: Is the Sized bound necessary? Do we want it? The alternative is to sprinkle
+    // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
+    Indices: UniqueIndices + Sized,
+    IntoAccess: IntoUnsyncAccess<Indices::Index>,
+{
+    UniqueIndicesWithAccess {
+        indices,
+        access: access.into_unsync_access(),
     }
 }
 
