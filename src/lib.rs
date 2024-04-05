@@ -5,6 +5,8 @@
 #[cfg(feature = "rayon")]
 pub mod rayon;
 
+use std::collections::HashSet;
+use std::hash::Hash;
 pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
 use std::ops::Range;
 
@@ -33,6 +35,22 @@ pub unsafe trait UniqueIndices: Sync + Send {
     }
 }
 
+/// Marker trait for types suitable as indices.
+///
+/// Any implementor of this trait must uphold the contract that if two indices compare unequal,
+/// then they do not index the same location.
+pub unsafe trait UniqueIndex: Eq + Copy {}
+
+unsafe impl UniqueIndex for usize {}
+unsafe impl UniqueIndex for (usize, usize) {}
+unsafe impl UniqueIndex for (usize, usize, usize) {}
+unsafe impl UniqueIndex for (usize, usize, usize, usize) {}
+unsafe impl UniqueIndex for [usize; 1] {}
+unsafe impl UniqueIndex for [usize; 2] {}
+unsafe impl UniqueIndex for [usize; 3] {}
+unsafe impl UniqueIndex for [usize; 4] {}
+// TODO: More tuples, arrays etc.
+
 #[derive(Debug)]
 pub struct UniqueIndicesWithAccess<'a, Indices, Access> {
     indices: &'a Indices,
@@ -59,7 +77,7 @@ where
     fn in_bounds(&self, index: usize) -> bool {
         let in_bounds_in_index_list = index < self.indices.num_indices();
         if in_bounds_in_index_list {
-            let index = self.indices.get(index);
+            let index = unsafe { self.indices.get_unchecked(index) };
             self.access.in_bounds(index)
         } else {
             false
@@ -68,12 +86,16 @@ where
 
     #[inline(always)]
     unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
-        self.access.get_unsync_unchecked(self.indices.get(index))
+        // Cannot use unchecked indexing here, see note in _mut
+        self.access.get_unsync(self.indices.get(index))
     }
 
     #[inline(always)]
     unsafe fn get_unsync_unchecked_mut(&self, index: usize) -> Self::RecordMut {
-        self.access.get_unsync_unchecked_mut(self.indices.get(index))
+        // Note: We can not use unchecked indexing here because
+        // we can not know that the index we obtain for indexing into the access
+        // is actually in bounds
+        unsafe { self.access.get_unsync_mut(self.indices.get_unchecked(index)) }
     }
 }
 
@@ -82,6 +104,7 @@ where
     Indices: UniqueIndices,
     Access: UnsyncAccess<Indices::Index>,
 {
+    #[inline(always)]
     fn len(&self) -> usize {
         self.indices.num_indices()
     }
@@ -96,6 +119,44 @@ unsafe impl UniqueIndices for Range<usize> {
 
     fn num_indices(&self) -> usize {
         self.end.saturating_sub(self.start)
+    }
+}
+
+pub struct CheckedUniqueIndices<Idx> {
+    // TODO: Generalize to something like IndexContainer that supports e.g. Vec<Idx>, &[Idx]
+    indices: Vec<Idx>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NonUniqueIndex;
+
+impl<Idx: UniqueIndex> CheckedUniqueIndices<Idx> {
+    pub fn from_hashable_indices(indices: Vec<Idx>) -> Result<Self, NonUniqueIndex>
+    where
+        Idx: Hash
+    {
+        // TODO: Implement re-usable "checker" for re-using allocations
+        let hashed: HashSet<Idx> = indices.iter().copied().collect();
+        if hashed.len() == indices.len() {
+            Ok(Self { indices })
+        } else {
+            Err(NonUniqueIndex)
+        }
+    }
+}
+
+unsafe impl<Idx> UniqueIndices for CheckedUniqueIndices<Idx>
+where
+    Idx: UniqueIndex + Send + Sync
+{
+    type Index = Idx;
+
+    unsafe fn get_unchecked(&self, i: usize) -> Self::Index {
+        *self.indices.get_unchecked(i)
+    }
+
+    fn num_indices(&self) -> usize {
+        self.indices.len()
     }
 }
 
