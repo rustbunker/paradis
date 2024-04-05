@@ -1,5 +1,5 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
-use paradis::rayon::linear_unsync_access_par_iter;
+use paradis::rayon::create_par_iter;
 use paradis::UnsyncAccess;
 use paradis_core::LinearUnsyncAccess;
 use rayon::iter::ParallelIterator;
@@ -83,7 +83,7 @@ fn main() {
     // of indices
     // let indices = 0..n;
 
-    linear_unsync_access_par_iter(col_access).for_each(|mut col| {
+    create_par_iter(col_access).for_each(|mut col| {
         assert_eq!(col.nrows(), m);
         assert_eq!(col.ncols(), 1);
         col *= 2.0;

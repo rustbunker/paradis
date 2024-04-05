@@ -19,7 +19,8 @@ impl<Access> LinearUnsyncAccessParIter<Access> {
     }
 }
 
-pub fn linear_unsync_access_par_iter<IntoAccess>(
+/// Creates a [`rayon`] parallel iterator for the provided linear unsynchronized access.
+pub fn create_par_iter<IntoAccess>(
     access: IntoAccess,
 ) -> LinearUnsyncAccessParIter<IntoAccess::Access>
 where

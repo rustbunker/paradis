@@ -15,11 +15,11 @@ paradis-core = { version = "0.0.3", path = "paradis-core" }
 rayon = { version = "1.6.1", optional = true }
 
 [[example]]
-name = "rayon_access_iter_slice"
+name = "rayon_access_slice"
 required-features = [ "rayon" ]
 
 [[example]]
-name = "rayon_access_iter_matrix_cols"
+name = "rayon_access_nalgebra"
 required-features = [ "rayon" ]
 
 [dev-dependencies]
