@@ -1,6 +1,6 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::UnsyncAccess;
+use paradis::{CheckedUniqueIndices, compose_access_with_indices, UnsyncAccess};
 use paradis_core::LinearUnsyncAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
@@ -73,7 +73,90 @@ unsafe impl<'a, T: Scalar> LinearUnsyncAccess for DMatrixColUnsyncAccess<'a, T> 
     }
 }
 
+/// Facilitates (parallel) unsynchronized access to elements of a DMatrix
+pub struct DMatrixUnsyncAccess<'a, T> {
+    ptr: *mut T,
+    rows: usize,
+    cols: usize,
+    marker: PhantomData<&'a T>,
+}
+
+unsafe impl<'a, T> Send for DMatrixUnsyncAccess<'a, T> {}
+unsafe impl<'a, T> Sync for DMatrixUnsyncAccess<'a, T> {}
+
+impl<'a, T> DMatrixUnsyncAccess<'a, T> {
+    pub fn from_matrix_mut(matrix: &'a mut DMatrix<T>) -> Self {
+        Self {
+            rows: matrix.nrows(),
+            cols: matrix.ncols(),
+            marker: Default::default(),
+            ptr: matrix.as_mut_ptr(),
+        }
+    }
+}
+
+unsafe impl<'a, T: Scalar> UnsyncAccess<(usize, usize)> for DMatrixUnsyncAccess<'a, T> {
+    type Record = &'a T;
+    type RecordMut = &'a mut T;
+
+    unsafe fn clone_access(&self) -> Self {
+        Self {
+            ptr: self.ptr,
+            rows: self.rows,
+            cols: self.cols,
+            marker: self.marker.clone(),
+        }
+    }
+
+    fn in_bounds(&self, (i, j): (usize, usize)) -> bool {
+        i < self.rows && j < self.cols
+    }
+
+    unsafe fn get_unsync_unchecked(&self, (i, j): (usize, usize)) -> Self::Record {
+        // Storage is col major
+        let linear_idx = j * self.rows + i;
+        &*self.ptr.add(linear_idx)
+    }
+
+    unsafe fn get_unsync_unchecked_mut(&self, (i, j): (usize, usize)) -> Self::RecordMut {
+        // Storage is col major
+        let linear_idx = j * self.rows + i;
+        &mut *self.ptr.add(linear_idx)
+    }
+}
+
 fn main() {
+    example_par_matrix_entries_iteration();
+    example_par_column_iteration();
+}
+
+fn example_par_matrix_entries_iteration() {
+    let m = 100;
+    let n = 1000;
+    let mut matrix = DMatrix::repeat(m, n, 1.0);
+
+    let matrix_access = DMatrixUnsyncAccess::from_matrix_mut(&mut matrix);
+
+    let indices = vec![(0, 0), (1, 0), (99, 100)];
+    let checked_indices = CheckedUniqueIndices::from_hashable_indices(indices.clone())
+        .expect("All indices unique");
+
+    let access = compose_access_with_indices(matrix_access, &checked_indices);
+    create_par_iter(access)
+        .for_each(|a_ij| *a_ij *= 2.0);
+
+    for (i, j) in (0 .. m).zip(0 .. n) {
+        let elem = matrix[(i, j)];
+        if indices.contains(&(i, j)) {
+            assert_eq!(elem, 2.0);
+        } else {
+            assert_eq!(elem, 1.0);
+        }
+    }
+}
+
+fn example_par_column_iteration() {
+    // Iterate over columns in parallel
     let m = 100;
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 2.0);
