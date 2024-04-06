@@ -5,10 +5,10 @@
 #[cfg(feature = "rayon")]
 pub mod rayon;
 
+pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
 use std::collections::HashSet;
 use std::hash::Hash;
 use std::marker::PhantomData;
-pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
 use std::ops::Range;
 
 pub unsafe trait UniqueIndices: Sync + Send {
@@ -41,7 +41,7 @@ pub unsafe trait UniqueIndices: Sync + Send {
 
 pub struct UniqueIndicesConvertedType<Indices, TargetIndex> {
     source_indices: Indices,
-    marker: PhantomData<TargetIndex>
+    marker: PhantomData<TargetIndex>,
 }
 
 unsafe impl<Indices, TargetIndex> UniqueIndices for UniqueIndicesConvertedType<Indices, TargetIndex>
@@ -55,7 +55,6 @@ where
         // TODO: Cannot use TryFrom since it's not guaranteed to be
         let source_idx = self.source_indices.get_unchecked(i);
         TargetIndex::index_from(source_idx)
-
     }
 
     fn num_indices(&self) -> usize {
@@ -63,8 +62,10 @@ where
     }
 }
 
-pub fn compose_access_with_indices<IntoAccess, Indices>(access: IntoAccess, indices: &Indices)
-    -> UniqueIndicesWithAccess<'_, Indices, IntoAccess::Access>
+pub fn compose_access_with_indices<IntoAccess, Indices>(
+    access: IntoAccess,
+    indices: &Indices,
+) -> UniqueIndicesWithAccess<'_, Indices, IntoAccess::Access>
 where
     // TODO: Is the Sized bound necessary? Do we want it? The alternative is to sprinkle
     // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
@@ -119,19 +120,41 @@ unsafe impl UniqueIndex for usize {}
     target_pointer_width = "128",
 ))]
 unsafe impl UniqueIndex for u32 {}
-#[cfg(any(
-    target_pointer_width = "64",
-    target_pointer_width = "128",
-))]
+#[cfg(any(target_pointer_width = "64", target_pointer_width = "128",))]
 unsafe impl UniqueIndex for u64 {}
 
 unsafe impl<I0: UniqueIndex> UniqueIndex for (I0,) {}
 unsafe impl<I0: UniqueIndex, I1: UniqueIndex> UniqueIndex for (I0, I1) {}
 unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex> UniqueIndex for (I0, I1, I2) {}
-unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex> UniqueIndex for (I0, I1, I2, I3) {}
-unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex, I4: UniqueIndex> UniqueIndex for (I0, I1, I2, I3, I4) {}
-unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex, I4: UniqueIndex, I5: UniqueIndex> UniqueIndex for (I0, I1, I2, I3, I4, I5) {}
-unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex, I4: UniqueIndex, I5: UniqueIndex, I6: UniqueIndex> UniqueIndex for (I0, I1, I2, I3, I4, I5, I6) {}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex> UniqueIndex
+    for (I0, I1, I2, I3)
+{
+}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex, I4: UniqueIndex>
+    UniqueIndex for (I0, I1, I2, I3, I4)
+{
+}
+unsafe impl<
+        I0: UniqueIndex,
+        I1: UniqueIndex,
+        I2: UniqueIndex,
+        I3: UniqueIndex,
+        I4: UniqueIndex,
+        I5: UniqueIndex,
+    > UniqueIndex for (I0, I1, I2, I3, I4, I5)
+{
+}
+unsafe impl<
+        I0: UniqueIndex,
+        I1: UniqueIndex,
+        I2: UniqueIndex,
+        I3: UniqueIndex,
+        I4: UniqueIndex,
+        I5: UniqueIndex,
+        I6: UniqueIndex,
+    > UniqueIndex for (I0, I1, I2, I3, I4, I5, I6)
+{
+}
 
 pub trait IndexFrom<SourceIndex>: internal::Sealed {
     fn index_from(source: SourceIndex) -> Self;
@@ -152,18 +175,17 @@ impl IndexFrom<usize> for usize {
 ))]
 impl IndexFrom<u32> for usize {
     fn index_from(source: u32) -> Self {
-        source.try_into()
+        source
+            .try_into()
             .expect("Can always convert u32 to usize since we assume usize is at least 32 bits")
     }
 }
 
-#[cfg(any(
-    target_pointer_width = "64",
-    target_pointer_width = "128",
-))]
+#[cfg(any(target_pointer_width = "64", target_pointer_width = "128",))]
 impl IndexFrom<u64> for usize {
     fn index_from(source: u64) -> Self {
-        source.try_into()
+        source
+            .try_into()
             .expect("Can always convert u64 to usize since we assume usize is at least 64 bits")
     }
 }
@@ -171,7 +193,7 @@ impl IndexFrom<u64> for usize {
 impl<I0> IndexFrom<(I0,)> for (usize,)
 where
     I0: UniqueIndex,
-    usize: IndexFrom<I0>
+    usize: IndexFrom<I0>,
 {
     fn index_from((i0,): (I0,)) -> Self {
         (usize::index_from(i0),)
@@ -179,10 +201,10 @@ where
 }
 
 impl<I0, I1> IndexFrom<(I0, I1)> for (usize, usize)
-    where
-        I0: UniqueIndex,
-        I1: UniqueIndex,
-        usize: IndexFrom<I0> + IndexFrom<I1>,
+where
+    I0: UniqueIndex,
+    I1: UniqueIndex,
+    usize: IndexFrom<I0> + IndexFrom<I1>,
 {
     fn index_from((i0, i1): (I0, I1)) -> Self {
         (usize::index_from(i0), usize::index_from(i1))
@@ -194,10 +216,11 @@ impl<I0, I1> IndexFrom<(I0, I1)> for (usize, usize)
 #[derive(Debug)]
 pub struct UniqueIndicesWithAccess<'a, Indices, Access> {
     indices: &'a Indices,
-    access: Access
+    access: Access,
 }
 
-unsafe impl<'a, Indices, Access> UnsyncAccess<usize> for UniqueIndicesWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> UnsyncAccess<usize>
+    for UniqueIndicesWithAccess<'a, Indices, Access>
 where
     Indices: UniqueIndices,
     Access: UnsyncAccess<Indices::Index>,
@@ -235,7 +258,10 @@ where
         // Note: We can not use unchecked indexing here because
         // we can not know that the index we obtain for indexing into the access
         // is actually in bounds
-        unsafe { self.access.get_unsync_mut(self.indices.get_unchecked(index)) }
+        unsafe {
+            self.access
+                .get_unsync_mut(self.indices.get_unchecked(index))
+        }
     }
 }
 
@@ -273,7 +299,7 @@ pub struct NonUniqueIndex;
 impl<Idx: UniqueIndex> CheckedUniqueIndices<Idx> {
     pub fn from_hashable_indices(indices: Vec<Idx>) -> Result<Self, NonUniqueIndex>
     where
-        Idx: Hash
+        Idx: Hash,
     {
         // TODO: Implement re-usable "checker" for re-using allocations
         let hashed: HashSet<Idx> = indices.iter().copied().collect();
@@ -287,7 +313,7 @@ impl<Idx: UniqueIndex> CheckedUniqueIndices<Idx> {
 
 unsafe impl<Idx> UniqueIndices for CheckedUniqueIndices<Idx>
 where
-    Idx: UniqueIndex + Send + Sync
+    Idx: UniqueIndex + Send + Sync,
 {
     type Index = Idx;
 

@@ -1,5 +1,5 @@
 use paradis::rayon::create_par_iter;
-use paradis::{CheckedUniqueIndices, compose_access_with_indices, UniqueIndices};
+use paradis::{compose_access_with_indices, CheckedUniqueIndices, UniqueIndices};
 use rayon::iter::ParallelIterator;
 
 fn main() {
@@ -14,8 +14,7 @@ fn example_with_checked_indices_u32() {
         .cast_index_type();
 
     let access = compose_access_with_indices(data.as_mut_slice(), &checked_indices);
-    create_par_iter(access)
-        .for_each(|x| *x *= 2.0);
+    create_par_iter(access).for_each(|x| *x *= 2.0);
 
     for (idx, elem) in data.into_iter().enumerate() {
         if indices.contains(&(idx as u32)) {

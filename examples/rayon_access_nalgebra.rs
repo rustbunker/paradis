@@ -1,6 +1,6 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::{CheckedUniqueIndices, compose_access_with_indices, UnsyncAccess};
+use paradis::{compose_access_with_indices, CheckedUniqueIndices, UnsyncAccess};
 use paradis_core::LinearUnsyncAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
@@ -138,14 +138,13 @@ fn example_par_matrix_entries_iteration() {
     let matrix_access = DMatrixUnsyncAccess::from_matrix_mut(&mut matrix);
 
     let indices = vec![(0, 0), (1, 0), (99, 100)];
-    let checked_indices = CheckedUniqueIndices::from_hashable_indices(indices.clone())
-        .expect("All indices unique");
+    let checked_indices =
+        CheckedUniqueIndices::from_hashable_indices(indices.clone()).expect("All indices unique");
 
     let access = compose_access_with_indices(matrix_access, &checked_indices);
-    create_par_iter(access)
-        .for_each(|a_ij| *a_ij *= 2.0);
+    create_par_iter(access).for_each(|a_ij| *a_ij *= 2.0);
 
-    for (i, j) in (0 .. m).zip(0 .. n) {
+    for (i, j) in (0..m).zip(0..n) {
         let elem = matrix[(i, j)];
         if indices.contains(&(i, j)) {
             assert_eq!(elem, 2.0);
