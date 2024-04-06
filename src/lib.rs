@@ -7,6 +7,7 @@ pub mod rayon;
 
 use std::collections::HashSet;
 use std::hash::Hash;
+use std::marker::PhantomData;
 pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
 use std::ops::Range;
 
@@ -19,6 +20,46 @@ pub unsafe trait UniqueIndices: Sync + Send {
     fn get(&self, i: usize) -> Self::Index {
         assert!(i < self.num_indices(), "Index must be in bounds");
         unsafe { self.get_unchecked(i) }
+    }
+
+    /// Casts indices in this collection to the desired type.
+    ///
+    /// This method is generally used to convert index types smaller than `usize` or `usize` tuples
+    /// to `usize` tuples. For example, a collection of `(u32, u32)` might be used as
+    /// indices into a matrix data structure that can be indexed by `(usize, usize)`.
+    fn cast_index_type<TargetIndex>(self) -> UniqueIndicesConvertedType<Self, TargetIndex>
+    where
+        Self: Sized,
+        TargetIndex: Copy + IndexFrom<Self::Index>,
+    {
+        UniqueIndicesConvertedType {
+            source_indices: self,
+            marker: Default::default(),
+        }
+    }
+}
+
+pub struct UniqueIndicesConvertedType<Indices, TargetIndex> {
+    source_indices: Indices,
+    marker: PhantomData<TargetIndex>
+}
+
+unsafe impl<Indices, TargetIndex> UniqueIndices for UniqueIndicesConvertedType<Indices, TargetIndex>
+where
+    Indices: UniqueIndices,
+    TargetIndex: Copy + UniqueIndex + IndexFrom<Indices::Index>,
+{
+    type Index = TargetIndex;
+
+    unsafe fn get_unchecked(&self, i: usize) -> Self::Index {
+        // TODO: Cannot use TryFrom since it's not guaranteed to be
+        let source_idx = self.source_indices.get_unchecked(i);
+        TargetIndex::index_from(source_idx)
+
+    }
+
+    fn num_indices(&self) -> usize {
+        self.source_indices.num_indices()
     }
 }
 
@@ -36,21 +77,119 @@ where
     }
 }
 
-/// Marker trait for types suitable as indices.
+mod internal {
+    pub trait Sealed {}
+
+    impl Sealed for u8 {}
+    impl Sealed for u16 {}
+    impl Sealed for u32 {}
+    impl Sealed for u64 {}
+    impl Sealed for usize {}
+
+    impl<I0> Sealed for (I0,) {}
+    impl<I0, I1> Sealed for (I0, I1) {}
+    impl<I0, I1, I2> Sealed for (I0, I1, I2) {}
+    impl<I0, I1, I2, I3> Sealed for (I0, I1, I2, I3) {}
+    impl<I0, I1, I2, I3, I4> Sealed for (I0, I1, I2, I3, I4) {}
+    impl<I0, I1, I2, I3, I4, I5> Sealed for (I0, I1, I2, I3, I4, I5) {}
+    impl<I0, I1, I2, I3, I4, I5, I6> Sealed for (I0, I1, I2, I3, I4, I5, I6) {}
+}
+
+/// A type suitable for use as an index.
 ///
 /// Any implementor of this trait must uphold the contract that if two indices compare unequal,
 /// then they do not index the same location.
-pub unsafe trait UniqueIndex: Eq + Copy {}
+///
+/// TODO: I'm not sure if it's necessary to seal this trait, but until someone comes up with
+/// a compelling use case that requires implementing this trait outside of this crate,
+/// it's convenient to do so.
+///
+/// TODO: Rename trait...
+pub unsafe trait UniqueIndex: internal::Sealed + Eq + Copy + Send + Sync {}
 
 unsafe impl UniqueIndex for usize {}
-unsafe impl UniqueIndex for (usize, usize) {}
-unsafe impl UniqueIndex for (usize, usize, usize) {}
-unsafe impl UniqueIndex for (usize, usize, usize, usize) {}
-unsafe impl UniqueIndex for [usize; 1] {}
-unsafe impl UniqueIndex for [usize; 2] {}
-unsafe impl UniqueIndex for [usize; 3] {}
-unsafe impl UniqueIndex for [usize; 4] {}
-// TODO: More tuples, arrays etc.
+
+// TODO: Implement u8, u16 and so on
+// unsafe impl UniqueIndex for u8 {}
+// unsafe impl UniqueIndex for u16 {}
+
+#[cfg(any(
+    target_pointer_width = "32",
+    target_pointer_width = "64",
+    target_pointer_width = "128",
+))]
+unsafe impl UniqueIndex for u32 {}
+#[cfg(any(
+    target_pointer_width = "64",
+    target_pointer_width = "128",
+))]
+unsafe impl UniqueIndex for u64 {}
+
+unsafe impl<I0: UniqueIndex> UniqueIndex for (I0,) {}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex> UniqueIndex for (I0, I1) {}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex> UniqueIndex for (I0, I1, I2) {}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex> UniqueIndex for (I0, I1, I2, I3) {}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex, I4: UniqueIndex> UniqueIndex for (I0, I1, I2, I3, I4) {}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex, I4: UniqueIndex, I5: UniqueIndex> UniqueIndex for (I0, I1, I2, I3, I4, I5) {}
+unsafe impl<I0: UniqueIndex, I1: UniqueIndex, I2: UniqueIndex, I3: UniqueIndex, I4: UniqueIndex, I5: UniqueIndex, I6: UniqueIndex> UniqueIndex for (I0, I1, I2, I3, I4, I5, I6) {}
+
+pub trait IndexFrom<SourceIndex>: internal::Sealed {
+    fn index_from(source: SourceIndex) -> Self;
+}
+
+impl IndexFrom<usize> for usize {
+    fn index_from(source: usize) -> Self {
+        source
+    }
+}
+
+// TODO: Implement IndexFrom<u8>, <u16>
+
+#[cfg(any(
+    target_pointer_width = "32",
+    target_pointer_width = "64",
+    target_pointer_width = "128",
+))]
+impl IndexFrom<u32> for usize {
+    fn index_from(source: u32) -> Self {
+        source.try_into()
+            .expect("Can always convert u32 to usize since we assume usize is at least 32 bits")
+    }
+}
+
+#[cfg(any(
+    target_pointer_width = "64",
+    target_pointer_width = "128",
+))]
+impl IndexFrom<u64> for usize {
+    fn index_from(source: u64) -> Self {
+        source.try_into()
+            .expect("Can always convert u64 to usize since we assume usize is at least 64 bits")
+    }
+}
+
+impl<I0> IndexFrom<(I0,)> for (usize,)
+where
+    I0: UniqueIndex,
+    usize: IndexFrom<I0>
+{
+    fn index_from((i0,): (I0,)) -> Self {
+        (usize::index_from(i0),)
+    }
+}
+
+impl<I0, I1> IndexFrom<(I0, I1)> for (usize, usize)
+    where
+        I0: UniqueIndex,
+        I1: UniqueIndex,
+        usize: IndexFrom<I0> + IndexFrom<I1>,
+{
+    fn index_from((i0, i1): (I0, I1)) -> Self {
+        (usize::index_from(i0), usize::index_from(i1))
+    }
+}
+
+// TODO: Implement IndexFrom for further tuples
 
 #[derive(Debug)]
 pub struct UniqueIndicesWithAccess<'a, Indices, Access> {
