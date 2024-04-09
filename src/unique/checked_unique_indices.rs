@@ -1,4 +1,5 @@
-use crate::unique::{UniqueIndex, UniqueIndices};
+use crate::UniqueIndex;
+use crate::unique::UniqueIndices;
 use std::collections::HashSet;
 use std::hash::Hash;
 

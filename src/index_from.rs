@@ -1,5 +1,5 @@
 use crate::internal;
-use crate::unique::unique_index::UniqueIndex;
+use crate::UniqueIndex;
 
 pub trait IndexFrom<SourceIndex>: internal::Sealed {
     fn index_from(source: SourceIndex) -> Self;

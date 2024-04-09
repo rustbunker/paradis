@@ -1,5 +1,4 @@
-use crate::unique::index_from::IndexFrom;
-use crate::unique::unique_index::UniqueIndex;
+use crate::{IndexFrom, UniqueIndex};
 use paradis_core::{LinearUnsyncAccess, UnsyncAccess};
 use std::marker::PhantomData;
 use std::ops::Range;

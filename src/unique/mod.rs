@@ -2,13 +2,9 @@
 use paradis_core::IntoUnsyncAccess;
 
 mod checked_unique_indices;
-mod index_from;
-mod unique_index;
 mod unique_indices;
 
 pub use checked_unique_indices::CheckedUniqueIndices;
-pub use index_from::IndexFrom;
-pub use unique_index::UniqueIndex;
 pub use unique_indices::{UniqueIndices, UniqueIndicesConvertedType, UniqueIndicesWithAccess};
 
 pub fn compose_access_with_indices<IntoAccess, Indices>(
