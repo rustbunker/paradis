@@ -1,6 +1,7 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::{compose_access_with_indices, CheckedUniqueIndices, UnsyncAccess};
+use paradis::unique::{compose_access_with_indices, CheckedUniqueIndices};
+use paradis::UnsyncAccess;
 use paradis_core::LinearUnsyncAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
