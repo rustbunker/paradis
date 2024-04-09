@@ -1,5 +1,5 @@
 use crate::internal;
-use crate::UniqueIndex;
+use crate::RecordIndex;
 
 pub trait IndexFrom<SourceIndex>: internal::Sealed {
     fn index_from(source: SourceIndex) -> Self;
@@ -35,7 +35,7 @@ impl IndexFrom<u64> for usize {
 
 impl<I0> IndexFrom<(I0,)> for (usize,)
 where
-    I0: UniqueIndex,
+    I0: RecordIndex,
     usize: IndexFrom<I0>,
 {
     fn index_from((i0,): (I0,)) -> Self {
@@ -45,8 +45,8 @@ where
 
 impl<I0, I1> IndexFrom<(I0, I1)> for (usize, usize)
 where
-    I0: UniqueIndex,
-    I1: UniqueIndex,
+    I0: RecordIndex,
+    I1: RecordIndex,
     usize: IndexFrom<I0> + IndexFrom<I1>,
 {
     fn index_from((i0, i1): (I0, I1)) -> Self {

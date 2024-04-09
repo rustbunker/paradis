@@ -1,4 +1,4 @@
-use crate::{IndexFrom, UniqueIndex};
+use crate::{IndexFrom, RecordIndex};
 use paradis_core::{LinearUnsyncAccess, UnsyncAccess};
 use std::marker::PhantomData;
 use std::ops::Range;
@@ -39,7 +39,7 @@ pub struct UniqueIndicesConvertedType<Indices, TargetIndex> {
 unsafe impl<Indices, TargetIndex> UniqueIndices for UniqueIndicesConvertedType<Indices, TargetIndex>
 where
     Indices: UniqueIndices,
-    TargetIndex: Copy + UniqueIndex + IndexFrom<Indices::Index>,
+    TargetIndex: Copy + RecordIndex + IndexFrom<Indices::Index>,
 {
     type Index = TargetIndex;
 

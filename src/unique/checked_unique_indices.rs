@@ -1,5 +1,5 @@
-use crate::UniqueIndex;
 use crate::unique::UniqueIndices;
+use crate::RecordIndex;
 use std::collections::HashSet;
 use std::hash::Hash;
 
@@ -11,7 +11,7 @@ pub struct CheckedUniqueIndices<Idx> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NonUniqueIndex;
 
-impl<Idx: UniqueIndex> CheckedUniqueIndices<Idx> {
+impl<Idx: RecordIndex> CheckedUniqueIndices<Idx> {
     pub fn from_hashable_indices(indices: Vec<Idx>) -> Result<Self, NonUniqueIndex>
     where
         Idx: Hash,
@@ -28,7 +28,7 @@ impl<Idx: UniqueIndex> CheckedUniqueIndices<Idx> {
 
 unsafe impl<Idx> UniqueIndices for CheckedUniqueIndices<Idx>
 where
-    Idx: UniqueIndex + Send + Sync,
+    Idx: RecordIndex + Send + Sync,
 {
     type Index = Idx;
 

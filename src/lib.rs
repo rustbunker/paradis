@@ -6,12 +6,12 @@
 pub mod rayon;
 pub mod unique;
 
-mod unique_index;
 mod index_from;
+mod unique_index;
 
 pub use index_from::IndexFrom;
 pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
-pub use unique_index::UniqueIndex;
+pub use unique_index::RecordIndex;
 
 mod internal {
     pub trait Sealed {}
