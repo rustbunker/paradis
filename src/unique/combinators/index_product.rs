@@ -12,7 +12,7 @@ pub struct IndexProduct<A, B>(pub A, pub B);
 unsafe impl<A, B> UniqueIndices for IndexProduct<A, B>
 where
     A: UniqueIndices,
-    B: UniqueIndices
+    B: UniqueIndices,
 {
     type Index = (A::Index, B::Index);
 
@@ -30,12 +30,12 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::unique::UniqueIndices;
     use crate::unique::combinators::IndexProduct;
+    use crate::unique::UniqueIndices;
 
     #[test]
     fn index_product_basic_tests() {
-        let product = IndexProduct(0 .. 3, 1 .. 4);
+        let product = IndexProduct(0..3, 1..4);
         assert_eq!(product.num_indices(), 9);
 
         assert_eq!(product.get(0), (0, 1));
@@ -49,4 +49,3 @@ mod tests {
         assert_eq!(product.get(8), (2, 3));
     }
 }
-

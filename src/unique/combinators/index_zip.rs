@@ -7,11 +7,14 @@ pub struct IndexZip<A, B>(A, B);
 impl<A, B> IndexZip<A, B>
 where
     A: UniqueIndices,
-    B: UniqueIndices
+    B: UniqueIndices,
 {
     pub fn new(a: A, b: B) -> Self {
-        assert_eq!(a.num_indices(), b.num_indices(),
-                   "IndexZip requires the number of indices to be equal in the zipped index sets");
+        assert_eq!(
+            a.num_indices(),
+            b.num_indices(),
+            "IndexZip requires the number of indices to be equal in the zipped index sets"
+        );
         Self(a, b)
     }
 }
@@ -20,7 +23,7 @@ where
 unsafe impl<A, B> UniqueIndices for IndexZip<A, B>
 where
     A: UniqueIndices,
-    B: UniqueIndices
+    B: UniqueIndices,
 {
     type Index = (A::Index, B::Index);
 
