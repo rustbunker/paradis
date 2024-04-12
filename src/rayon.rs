@@ -3,12 +3,13 @@ use paradis_core::LinearUnsyncAccess;
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
 
+/// A parallel iterator for mutable records in a collection.
 #[derive(Debug)]
-pub struct LinearUnsyncAccessParIter<Access> {
+pub struct LinearUnsyncAccessParIterMut<Access> {
     access: Access,
 }
 
-impl<Access> LinearUnsyncAccessParIter<Access> {
+impl<Access> LinearUnsyncAccessParIterMut<Access> {
     pub fn from_access<IntoAccess>(access: IntoAccess) -> Self
     where
         IntoAccess: IntoUnsyncAccess<Access = Access>,
@@ -19,15 +20,15 @@ impl<Access> LinearUnsyncAccessParIter<Access> {
     }
 }
 
-/// Creates a [`rayon`] parallel iterator for the provided linear unsynchronized access.
-pub fn create_par_iter<IntoAccess>(
+/// Creates a mutable [`rayon`] parallel iterator for the provided linear unsynchronized access.
+pub fn create_par_iter_mut<IntoAccess>(
     access: IntoAccess,
-) -> LinearUnsyncAccessParIter<IntoAccess::Access>
+) -> LinearUnsyncAccessParIterMut<IntoAccess::Access>
 where
     IntoAccess: IntoUnsyncAccess,
     IntoAccess::Access: LinearUnsyncAccess,
 {
-    LinearUnsyncAccessParIter::from_access(access)
+    LinearUnsyncAccessParIterMut::from_access(access)
 }
 
 struct AccessProducerMut<Access> {
@@ -104,7 +105,7 @@ where
     }
 }
 
-impl<Access> ParallelIterator for LinearUnsyncAccessParIter<Access>
+impl<Access> ParallelIterator for LinearUnsyncAccessParIterMut<Access>
 where
     Access: LinearUnsyncAccess,
     Access::RecordMut: Send,
@@ -123,7 +124,7 @@ where
     }
 }
 
-impl<Access> IndexedParallelIterator for LinearUnsyncAccessParIter<Access>
+impl<Access> IndexedParallelIterator for LinearUnsyncAccessParIterMut<Access>
 where
     Access: LinearUnsyncAccess,
     Access::RecordMut: Send,

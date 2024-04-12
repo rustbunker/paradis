@@ -1,4 +1,4 @@
-use paradis::rayon::create_par_iter;
+use paradis::rayon::create_par_iter_mut;
 use paradis::unique::{compose_access_with_indices, CheckedUniqueIndices};
 use rayon::iter::ParallelIterator;
 
@@ -12,7 +12,7 @@ fn example_with_range() {
     let range = 5..data.len();
     let access = compose_access_with_indices(data.as_mut_slice(), &range);
 
-    create_par_iter(access).for_each(|x| *x *= 2.0);
+    create_par_iter_mut(access).for_each(|x| *x *= 2.0);
 
     assert!(data[5..].iter().all(|&x| x == 2.0));
     assert!(data[..5].iter().all(|&x| x == 1.0));
@@ -25,7 +25,7 @@ fn example_with_checked_indices() {
         CheckedUniqueIndices::from_hashable_indices(indices.clone()).expect("All indices unique");
 
     let access = compose_access_with_indices(data.as_mut_slice(), &checked_indices);
-    create_par_iter(access).for_each(|x| *x *= 2.0);
+    create_par_iter_mut(access).for_each(|x| *x *= 2.0);
 
     for (idx, elem) in data.into_iter().enumerate() {
         if indices.contains(&idx) {
