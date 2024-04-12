@@ -2,7 +2,7 @@ use crate::{IndexFrom, RecordIndex};
 use paradis_core::{LinearUnsyncAccess, UnsyncAccess};
 use std::marker::PhantomData;
 use std::ops::{Range, RangeInclusive};
-use crate::unique::combinators::IndexProduct;
+use crate::unique::combinators::{IndexProduct, IndexZip};
 
 pub unsafe trait UniqueIndices: Sync + Send {
     type Index: Copy;
@@ -37,6 +37,22 @@ pub unsafe trait UniqueIndices: Sync + Send {
         Self: Sized
     {
         IndexProduct(self, other)
+    }
+
+    /// Zips this index set with another.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the other index set does not have the same number of elements as this index set.
+    /// This behavior is distinct from Iterator::zip, which instead ignores elements in the longer
+    /// collection.
+    ///
+    /// TODO: Better docs
+    fn index_zip<I: UniqueIndices>(self, other: I) -> IndexZip<Self, I>
+    where
+        Self: Sized
+    {
+        IndexZip::new(self, other)
     }
 }
 

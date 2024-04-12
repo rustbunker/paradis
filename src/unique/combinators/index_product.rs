@@ -6,7 +6,7 @@ use crate::unique::UniqueIndices;
 /// TODO: Also provide `IndexRProduct` for alternative column-major ordering
 ///       that's probably a bad name, since it's not "reverse" as "R" might suggest.
 ///       IndexCProduct? Not sure..
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IndexProduct<A, B>(pub A, pub B);
 
 unsafe impl<A, B> UniqueIndices for IndexProduct<A, B>
