@@ -1,7 +1,8 @@
 use crate::{IndexFrom, RecordIndex};
 use paradis_core::{LinearUnsyncAccess, UnsyncAccess};
 use std::marker::PhantomData;
-use std::ops::Range;
+use std::ops::{Range, RangeInclusive};
+use crate::unique::combinators::IndexProduct;
 
 pub unsafe trait UniqueIndices: Sync + Send {
     type Index: Copy;
@@ -28,6 +29,14 @@ pub unsafe trait UniqueIndices: Sync + Send {
             source_indices: self,
             marker: Default::default(),
         }
+    }
+
+    /// Returns the Cartesian product of this index set with another set of (unique) indices.
+    fn index_product<I: UniqueIndices>(self, other: I) -> IndexProduct<Self, I>
+    where
+        Self: Sized
+    {
+        IndexProduct(self, other)
     }
 }
 
@@ -126,5 +135,17 @@ unsafe impl UniqueIndices for Range<usize> {
 
     fn num_indices(&self) -> usize {
         self.end.saturating_sub(self.start)
+    }
+}
+
+unsafe impl UniqueIndices for RangeInclusive<usize> {
+    type Index = usize;
+
+    unsafe fn get_unchecked(&self, i: usize) -> usize {
+        self.start() + i
+    }
+
+    fn num_indices(&self) -> usize {
+        self.clone().count()
     }
 }

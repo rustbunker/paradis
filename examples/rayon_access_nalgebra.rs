@@ -1,6 +1,6 @@
-use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
+use nalgebra::{DMatrix, dmatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::unique::{compose_access_with_indices, CheckedUniqueIndices};
+use paradis::unique::{compose_access_with_indices, CheckedUniqueIndices, UniqueIndices};
 use paradis::UnsyncAccess;
 use paradis_core::LinearUnsyncAccess;
 use rayon::iter::ParallelIterator;
@@ -128,6 +128,7 @@ unsafe impl<'a, T: Scalar> UnsyncAccess<(usize, usize)> for DMatrixUnsyncAccess<
 
 fn main() {
     example_par_matrix_entries_iteration();
+    example_par_matrix_submatrix_iteration();
     example_par_column_iteration();
 }
 
@@ -153,6 +154,24 @@ fn example_par_matrix_entries_iteration() {
             assert_eq!(elem, 1.0);
         }
     }
+}
+
+fn example_par_matrix_submatrix_iteration() {
+    let mut matrix = dmatrix!{ 0,  1,  2,  3,  4;
+                               5,  6,  7,  8,  9;
+                              10, 11, 12, 13, 14;
+                              15, 16, 17, 18, 19 };
+    let matrix_access = DMatrixUnsyncAccess::from_matrix_mut(&mut matrix);
+
+    // The 2x2 submatrix starting at (1, 2) can be described by a Cartesian product of index ranges
+    let indices = (1..=2).index_product(2..=3);
+    let access = compose_access_with_indices(matrix_access, &indices);
+    create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
+
+    assert_eq!(matrix, dmatrix!{ 0,  1,  2,  3,  4;
+                                 5,  6, 14, 16,  9;
+                                10, 11, 24, 26, 14;
+                                15, 16, 17, 18, 19 });
 }
 
 fn example_par_column_iteration() {

@@ -1,6 +1,8 @@
 //! Parallel iteration of collections indexed by unique indices.
 use paradis_core::IntoUnsyncAccess;
 
+pub mod combinators;
+
 mod checked_unique_indices;
 mod unique_indices;
 
