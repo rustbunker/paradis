@@ -1,6 +1,6 @@
 use crate::unique::combinators::{IndexProduct, IndexZip};
 use crate::{IndexFrom, RecordIndex};
-use paradis_core::{LinearUnsyncAccess, UnsyncAccess};
+use paradis_core::{LinearParAccess, ParAccess};
 use std::marker::PhantomData;
 use std::ops::{Range, RangeInclusive};
 
@@ -85,11 +85,11 @@ pub struct UniqueIndicesWithAccess<'a, Indices, Access> {
     pub(crate) access: Access,
 }
 
-unsafe impl<'a, Indices, Access> UnsyncAccess<usize>
+unsafe impl<'a, Indices, Access> ParAccess<usize>
     for UniqueIndicesWithAccess<'a, Indices, Access>
 where
     Indices: UniqueIndices,
-    Access: UnsyncAccess<Indices::Index>,
+    Access: ParAccess<Indices::Index>,
 {
     type Record = Access::Record;
     type RecordMut = Access::RecordMut;
@@ -131,10 +131,10 @@ where
     }
 }
 
-unsafe impl<'a, Indices, Access> LinearUnsyncAccess for UniqueIndicesWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> LinearParAccess for UniqueIndicesWithAccess<'a, Indices, Access>
 where
     Indices: UniqueIndices,
-    Access: UnsyncAccess<Indices::Index>,
+    Access: ParAccess<Indices::Index>,
 {
     #[inline(always)]
     fn len(&self) -> usize {

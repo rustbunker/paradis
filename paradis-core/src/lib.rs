@@ -11,8 +11,8 @@ pub mod slice;
 /// Facilitates unsynchronized access to (mutable) records stored in the collection.
 ///
 /// The trait provides *unsynchronized* access to (possibly mutable) *records*, defined by the
-/// associated types [`Record`][`UnsyncAccess::Record`] and
-/// [`RecordMut`][`UnsyncAccess::RecordMut`].
+/// associated types [`Record`][`ParAccess::Record`] and
+/// [`RecordMut`][`ParAccess::RecordMut`].
 ///
 /// # Safety
 ///
@@ -30,7 +30,7 @@ pub mod slice;
 ///   same index in the collection if either record is mutable.
 ///
 /// TODO: Make the invariants more precise
-pub unsafe trait UnsyncAccess<Index: Copy = usize>: Sync + Send {
+pub unsafe trait ParAccess<Index: Copy = usize>: Sync + Send {
     type Record;
     type RecordMut;
 
@@ -90,22 +90,22 @@ pub unsafe trait UnsyncAccess<Index: Copy = usize>: Sync + Send {
     unsafe fn get_unsync_unchecked_mut(&self, index: Index) -> Self::RecordMut;
 }
 
-pub trait IntoUnsyncAccess<Index: Copy = usize> {
-    type Access: UnsyncAccess<Index>;
+pub trait IntoParAccess<Index: Copy = usize> {
+    type Access: ParAccess<Index>;
 
-    fn into_unsync_access(self) -> Self::Access;
+    fn into_par_access(self) -> Self::Access;
 }
 
-impl<Index: Copy, Access: UnsyncAccess<Index>> IntoUnsyncAccess<Index> for Access {
+impl<Index: Copy, Access: ParAccess<Index>> IntoParAccess<Index> for Access {
     type Access = Self;
 
-    fn into_unsync_access(self) -> Self::Access {
+    fn into_par_access(self) -> Self::Access {
         self
     }
 }
 
 /// An unsynchronized access to an array-like structure, indexed by `usize`.
-pub unsafe trait LinearUnsyncAccess: UnsyncAccess<usize> {
+pub unsafe trait LinearParAccess: ParAccess<usize> {
     /// The number of accessible records.
     ///
     /// An implementor must ensure that this length never changes. In other words,

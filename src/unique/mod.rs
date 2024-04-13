@@ -1,5 +1,5 @@
 //! Parallel iteration of collections indexed by unique indices.
-use paradis_core::IntoUnsyncAccess;
+use paradis_core::IntoParAccess;
 
 pub mod combinators;
 
@@ -17,10 +17,10 @@ where
     // TODO: Is the Sized bound necessary? Do we want it? The alternative is to sprinkle
     // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
     Indices: UniqueIndices + Sized,
-    IntoAccess: IntoUnsyncAccess<Indices::Index>,
+    IntoAccess: IntoParAccess<Indices::Index>,
 {
     UniqueIndicesWithAccess {
         indices,
-        access: access.into_unsync_access(),
+        access: access.into_par_access(),
     }
 }

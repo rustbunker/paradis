@@ -1,34 +1,34 @@
-use crate::IntoUnsyncAccess;
-use paradis_core::LinearUnsyncAccess;
+use crate::IntoParAccess;
+use paradis_core::LinearParAccess;
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
 
 /// A parallel iterator for mutable records in a collection.
 #[derive(Debug)]
-pub struct LinearUnsyncAccessParIterMut<Access> {
+pub struct LinearParAccessIterMut<Access> {
     access: Access,
 }
 
-impl<Access> LinearUnsyncAccessParIterMut<Access> {
+impl<Access> LinearParAccessIterMut<Access> {
     pub fn from_access<IntoAccess>(access: IntoAccess) -> Self
     where
-        IntoAccess: IntoUnsyncAccess<Access = Access>,
-        IntoAccess::Access: LinearUnsyncAccess,
+        IntoAccess: IntoParAccess<Access = Access>,
+        IntoAccess::Access: LinearParAccess,
     {
-        let access = access.into_unsync_access();
+        let access = access.into_par_access();
         Self { access }
     }
 }
 
-/// Creates a mutable [`rayon`] parallel iterator for the provided linear unsynchronized access.
+/// Creates a mutable [`rayon`] parallel iterator for the provided linear parallel access.
 pub fn create_par_iter_mut<IntoAccess>(
     access: IntoAccess,
-) -> LinearUnsyncAccessParIterMut<IntoAccess::Access>
+) -> LinearParAccessIterMut<IntoAccess::Access>
 where
-    IntoAccess: IntoUnsyncAccess,
-    IntoAccess::Access: LinearUnsyncAccess,
+    IntoAccess: IntoParAccess,
+    IntoAccess::Access: LinearParAccess,
 {
-    LinearUnsyncAccessParIterMut::from_access(access)
+    LinearParAccessIterMut::from_access(access)
 }
 
 struct AccessProducerMut<Access> {
@@ -39,7 +39,7 @@ struct AccessProducerMut<Access> {
 
 impl<Access> Iterator for AccessProducerMut<Access>
 where
-    Access: LinearUnsyncAccess,
+    Access: LinearParAccess,
 {
     type Item = Access::RecordMut;
 
@@ -54,11 +54,11 @@ where
     }
 }
 
-impl<Access> ExactSizeIterator for AccessProducerMut<Access> where Access: LinearUnsyncAccess {}
+impl<Access> ExactSizeIterator for AccessProducerMut<Access> where Access: LinearParAccess {}
 
 impl<Access> DoubleEndedIterator for AccessProducerMut<Access>
 where
-    Access: LinearUnsyncAccess,
+    Access: LinearParAccess,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         // TODO: Need to test this impl
@@ -74,7 +74,7 @@ where
 
 impl<Access> Producer for AccessProducerMut<Access>
 where
-    Access: LinearUnsyncAccess,
+    Access: LinearParAccess,
 {
     type Item = Access::RecordMut;
     type IntoIter = Self;
@@ -105,9 +105,9 @@ where
     }
 }
 
-impl<Access> ParallelIterator for LinearUnsyncAccessParIterMut<Access>
+impl<Access> ParallelIterator for LinearParAccessIterMut<Access>
 where
-    Access: LinearUnsyncAccess,
+    Access: LinearParAccess,
     Access::RecordMut: Send,
 {
     type Item = Access::RecordMut;
@@ -124,9 +124,9 @@ where
     }
 }
 
-impl<Access> IndexedParallelIterator for LinearUnsyncAccessParIterMut<Access>
+impl<Access> IndexedParallelIterator for LinearParAccessIterMut<Access>
 where
-    Access: LinearUnsyncAccess,
+    Access: LinearParAccess,
     Access::RecordMut: Send,
 {
     fn len(&self) -> usize {

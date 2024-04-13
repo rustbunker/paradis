@@ -1,18 +1,18 @@
 //! Core primitives for slices.
-use crate::{IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
+use crate::{IntoParAccess, LinearParAccess, ParAccess};
 use std::marker::PhantomData;
 
 #[derive(Debug)]
-pub struct UnsyncSliceAccess<'a, T> {
+pub struct ParSliceAccess<'a, T> {
     ptr: *mut T,
     len: usize,
     marker: PhantomData<&'a mut T>,
 }
 
-unsafe impl<'a, T: Sync> Sync for UnsyncSliceAccess<'a, T> {}
-unsafe impl<'a, T: Send> Send for UnsyncSliceAccess<'a, T> {}
+unsafe impl<'a, T: Sync> Sync for ParSliceAccess<'a, T> {}
+unsafe impl<'a, T: Send> Send for ParSliceAccess<'a, T> {}
 
-unsafe impl<'a, T: Sync + Send> UnsyncAccess for UnsyncSliceAccess<'a, T> {
+unsafe impl<'a, T: Sync + Send> ParAccess for ParSliceAccess<'a, T> {
     type Record = &'a T;
     type RecordMut = &'a mut T;
 
@@ -41,11 +41,11 @@ unsafe impl<'a, T: Sync + Send> UnsyncAccess for UnsyncSliceAccess<'a, T> {
     }
 }
 
-impl<'a, T: Sync + Send> IntoUnsyncAccess<usize> for &'a mut [T] {
-    type Access = UnsyncSliceAccess<'a, T>;
+impl<'a, T: Sync + Send> IntoParAccess<usize> for &'a mut [T] {
+    type Access = ParSliceAccess<'a, T>;
 
-    fn into_unsync_access(self) -> Self::Access {
-        UnsyncSliceAccess {
+    fn into_par_access(self) -> Self::Access {
+        ParSliceAccess {
             ptr: self.as_mut_ptr(),
             len: self.len(),
             marker: PhantomData,
@@ -53,7 +53,7 @@ impl<'a, T: Sync + Send> IntoUnsyncAccess<usize> for &'a mut [T] {
     }
 }
 
-unsafe impl<'a, T: Sync + Send> LinearUnsyncAccess for UnsyncSliceAccess<'a, T> {
+unsafe impl<'a, T: Sync + Send> LinearParAccess for ParSliceAccess<'a, T> {
     fn len(&self) -> usize {
         self.len
     }

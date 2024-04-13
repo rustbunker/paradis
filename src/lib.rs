@@ -10,7 +10,7 @@ mod index_from;
 mod unique_index;
 
 pub use index_from::IndexFrom;
-pub use paradis_core::{slice, IntoUnsyncAccess, LinearUnsyncAccess, UnsyncAccess};
+pub use paradis_core::{slice, IntoParAccess, LinearParAccess, ParAccess};
 pub use unique_index::RecordIndex;
 
 mod internal {

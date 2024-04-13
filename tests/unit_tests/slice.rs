@@ -1,9 +1,9 @@
-use paradis_core::{IntoUnsyncAccess, UnsyncAccess};
+use paradis_core::{IntoParAccess, ParAccess};
 
 #[test]
 fn test_basic_access() {
     let slice = &mut [0, 1, 2, 3];
-    let access = slice.into_unsync_access();
+    let access = slice.into_par_access();
 
     // assert_eq!(access.len(), 4);
     assert_eq!(unsafe { access.get_unsync(0) }, &0);

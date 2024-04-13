@@ -1,22 +1,22 @@
 use nalgebra::{dmatrix, DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter_mut;
 use paradis::unique::{compose_access_with_indices, CheckedUniqueIndices, UniqueIndices};
-use paradis::UnsyncAccess;
-use paradis_core::LinearUnsyncAccess;
+use paradis::ParAccess;
+use paradis_core::LinearParAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
 
 /// Facilitates (parallel) unsynchronized access to columns of a DMatrix
-pub struct DMatrixColUnsyncAccess<'a, T> {
+pub struct DMatrixColParAccess<'a, T> {
     ptr: *mut T,
     rows: usize,
     cols: usize,
     marker: PhantomData<&'a T>,
 }
 
-impl<'a, T> DMatrixColUnsyncAccess<'a, T> {
+impl<'a, T> DMatrixColParAccess<'a, T> {
     pub fn from_matrix_mut(matrix: &'a mut DMatrix<T>) -> Self {
-        DMatrixColUnsyncAccess {
+        DMatrixColParAccess {
             rows: matrix.nrows(),
             cols: matrix.ncols(),
             marker: Default::default(),
@@ -25,10 +25,10 @@ impl<'a, T> DMatrixColUnsyncAccess<'a, T> {
     }
 }
 
-unsafe impl<'a, T> Send for DMatrixColUnsyncAccess<'a, T> {}
-unsafe impl<'a, T> Sync for DMatrixColUnsyncAccess<'a, T> {}
+unsafe impl<'a, T> Send for DMatrixColParAccess<'a, T> {}
+unsafe impl<'a, T> Sync for DMatrixColParAccess<'a, T> {}
 
-unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
+unsafe impl<'a, T: Scalar> ParAccess for DMatrixColParAccess<'a, T> {
     type Record = DVectorView<'a, T>;
     type RecordMut = DVectorViewMut<'a, T>;
 
@@ -68,24 +68,24 @@ unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Scalar> LinearUnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
+unsafe impl<'a, T: Scalar> LinearParAccess for DMatrixColParAccess<'a, T> {
     fn len(&self) -> usize {
         self.cols
     }
 }
 
 /// Facilitates (parallel) unsynchronized access to elements of a DMatrix
-pub struct DMatrixUnsyncAccess<'a, T> {
+pub struct DMatrixParAccess<'a, T> {
     ptr: *mut T,
     rows: usize,
     cols: usize,
     marker: PhantomData<&'a T>,
 }
 
-unsafe impl<'a, T> Send for DMatrixUnsyncAccess<'a, T> {}
-unsafe impl<'a, T> Sync for DMatrixUnsyncAccess<'a, T> {}
+unsafe impl<'a, T> Send for DMatrixParAccess<'a, T> {}
+unsafe impl<'a, T> Sync for DMatrixParAccess<'a, T> {}
 
-impl<'a, T> DMatrixUnsyncAccess<'a, T> {
+impl<'a, T> DMatrixParAccess<'a, T> {
     pub fn from_matrix_mut(matrix: &'a mut DMatrix<T>) -> Self {
         Self {
             rows: matrix.nrows(),
@@ -96,7 +96,7 @@ impl<'a, T> DMatrixUnsyncAccess<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Scalar> UnsyncAccess<(usize, usize)> for DMatrixUnsyncAccess<'a, T> {
+unsafe impl<'a, T: Scalar> ParAccess<(usize, usize)> for DMatrixParAccess<'a, T> {
     type Record = &'a T;
     type RecordMut = &'a mut T;
 
@@ -138,7 +138,7 @@ fn example_par_matrix_entries_iteration() {
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 1.0);
 
-    let matrix_access = DMatrixUnsyncAccess::from_matrix_mut(&mut matrix);
+    let matrix_access = DMatrixParAccess::from_matrix_mut(&mut matrix);
 
     let indices = vec![(0, 0), (1, 0), (99, 100)];
     let checked_indices =
@@ -162,7 +162,7 @@ fn example_par_matrix_submatrix_iteration() {
                                5,  6,  7,  8,  9;
                               10, 11, 12, 13, 14;
                               15, 16, 17, 18, 19 ];
-    let matrix_access = DMatrixUnsyncAccess::from_matrix_mut(&mut matrix);
+    let matrix_access = DMatrixParAccess::from_matrix_mut(&mut matrix);
 
     // The 2x2 submatrix starting at (1, 2) can be described by a Cartesian product of index ranges
     let indices = (1..=2).index_product(2..=3);
@@ -182,7 +182,7 @@ fn example_par_matrix_superdiagonal_iteration() {
     let mut matrix = dmatrix![ 0,  1,  2,  3,  4;
                                5,  6,  7,  8,  9;
                               10, 11, 12, 13, 14 ];
-    let matrix_access = DMatrixUnsyncAccess::from_matrix_mut(&mut matrix);
+    let matrix_access = DMatrixParAccess::from_matrix_mut(&mut matrix);
 
     // The first superdiagonal corresponds to zipping two index sets
     let superdiagonal_indices = (0..3).index_zip(1..4);
@@ -202,7 +202,7 @@ fn example_par_column_iteration() {
     let m = 100;
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 2.0);
-    let col_access = DMatrixColUnsyncAccess::from_matrix_mut(&mut matrix);
+    let col_access = DMatrixColParAccess::from_matrix_mut(&mut matrix);
 
     // TODO: Combine with disjoint index access to show that we can use this to access a subset
     // of indices
