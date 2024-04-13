@@ -6,7 +6,8 @@ fn par_even_odd(numbers: &mut [i32]) {
     let n = numbers.len();
 
     // Since creating an access takes a mutable reference to [i32], we know that we hold
-    // an exclusive unsync access to the data, so we can soundly manipulate its data in parallel, provided we are very careful.
+    // an exclusive unsync access to the data, so we can soundly manipulate its data in parallel,
+    // provided we are very careful.
     let access = numbers.into_par_access();
 
     scope(|s| {
@@ -14,7 +15,7 @@ fn par_even_odd(numbers: &mut [i32]) {
         s.spawn(|| {
             for i in (0..n).step_by(2) {
                 unsafe {
-                    *access.get_unsync_mut(i) *= 2;
+                    *access.get_unsync(i) *= 2;
                 }
             }
         });
@@ -22,7 +23,7 @@ fn par_even_odd(numbers: &mut [i32]) {
         s.spawn(|| {
             for i in (1..n).step_by(2) {
                 unsafe {
-                    *access.get_unsync_mut(i) *= 4;
+                    *access.get_unsync(i) *= 4;
                 }
             }
         });

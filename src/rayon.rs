@@ -3,13 +3,13 @@ use paradis_core::LinearParAccess;
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
 
-/// A parallel iterator for mutable records in a collection.
+/// A parallel iterator for records in a collection.
 #[derive(Debug)]
-pub struct LinearParAccessIterMut<Access> {
+pub struct LinearParAccessIter<Access> {
     access: Access,
 }
 
-impl<Access> LinearParAccessIterMut<Access> {
+impl<Access> LinearParAccessIter<Access> {
     pub fn from_access<IntoAccess>(access: IntoAccess) -> Self
     where
         IntoAccess: IntoParAccess<Access = Access>,
@@ -20,32 +20,32 @@ impl<Access> LinearParAccessIterMut<Access> {
     }
 }
 
-/// Creates a mutable [`rayon`] parallel iterator for the provided linear parallel access.
-pub fn create_par_iter_mut<IntoAccess>(
+/// Creates a [`rayon`] parallel iterator for the provided linear parallel access.
+pub fn create_par_iter<IntoAccess>(
     access: IntoAccess,
-) -> LinearParAccessIterMut<IntoAccess::Access>
+) -> LinearParAccessIter<IntoAccess::Access>
 where
     IntoAccess: IntoParAccess,
     IntoAccess::Access: LinearParAccess,
 {
-    LinearParAccessIterMut::from_access(access)
+    LinearParAccessIter::from_access(access)
 }
 
-struct AccessProducerMut<Access> {
+struct AccessProducer<Access> {
     access: Access,
     start_idx: usize,
     end_idx: usize,
 }
 
-impl<Access> Iterator for AccessProducerMut<Access>
+impl<Access> Iterator for AccessProducer<Access>
 where
     Access: LinearParAccess,
 {
-    type Item = Access::RecordMut;
+    type Item = Access::Record;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.start_idx < self.end_idx {
-            let item = unsafe { self.access.get_unsync_mut(self.start_idx) };
+            let item = unsafe { self.access.get_unsync(self.start_idx) };
             self.start_idx += 1;
             Some(item)
         } else {
@@ -54,9 +54,9 @@ where
     }
 }
 
-impl<Access> ExactSizeIterator for AccessProducerMut<Access> where Access: LinearParAccess {}
+impl<Access> ExactSizeIterator for AccessProducer<Access> where Access: LinearParAccess {}
 
-impl<Access> DoubleEndedIterator for AccessProducerMut<Access>
+impl<Access> DoubleEndedIterator for AccessProducer<Access>
 where
     Access: LinearParAccess,
 {
@@ -64,7 +64,7 @@ where
         // TODO: Need to test this impl
         if self.end_idx > self.start_idx {
             self.end_idx -= 1;
-            let item = unsafe { self.access.get_unsync_mut(self.end_idx) };
+            let item = unsafe { self.access.get_unsync(self.end_idx) };
             Some(item)
         } else {
             None
@@ -72,15 +72,15 @@ where
     }
 }
 
-impl<Access> Producer for AccessProducerMut<Access>
+impl<Access> Producer for AccessProducer<Access>
 where
     Access: LinearParAccess,
 {
-    type Item = Access::RecordMut;
+    type Item = Access::Record;
     type IntoIter = Self;
 
     fn into_iter(self) -> Self::IntoIter {
-        AccessProducerMut {
+        AccessProducer {
             access: self.access,
             start_idx: self.start_idx,
             end_idx: self.end_idx,
@@ -105,12 +105,12 @@ where
     }
 }
 
-impl<Access> ParallelIterator for LinearParAccessIterMut<Access>
+impl<Access> ParallelIterator for LinearParAccessIter<Access>
 where
     Access: LinearParAccess,
-    Access::RecordMut: Send,
+    Access::Record: Send,
 {
-    type Item = Access::RecordMut;
+    type Item = Access::Record;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -124,10 +124,10 @@ where
     }
 }
 
-impl<Access> IndexedParallelIterator for LinearParAccessIterMut<Access>
+impl<Access> IndexedParallelIterator for LinearParAccessIter<Access>
 where
     Access: LinearParAccess,
-    Access::RecordMut: Send,
+    Access::Record: Send,
 {
     fn len(&self) -> usize {
         self.access.len()
@@ -139,7 +139,7 @@ where
 
     fn with_producer<CB: ProducerCallback<Self::Item>>(self, callback: CB) -> CB::Output {
         let access = self.access;
-        callback.callback(AccessProducerMut {
+        callback.callback(AccessProducer {
             start_idx: 0,
             end_idx: access.len(),
             access,

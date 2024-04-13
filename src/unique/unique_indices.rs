@@ -92,7 +92,6 @@ where
     Access: ParAccess<Indices::Index>,
 {
     type Record = Access::Record;
-    type RecordMut = Access::RecordMut;
 
     #[inline(always)]
     unsafe fn clone_access(&self) -> Self {
@@ -115,19 +114,10 @@ where
 
     #[inline(always)]
     unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
-        // Cannot use unchecked indexing here, see note in _mut
-        self.access.get_unsync(self.indices.get(index))
-    }
-
-    #[inline(always)]
-    unsafe fn get_unsync_unchecked_mut(&self, index: usize) -> Self::RecordMut {
         // Note: We can not use unchecked indexing here because
         // we can not know that the index we obtain for indexing into the access
         // is actually in bounds
-        unsafe {
-            self.access
-                .get_unsync_mut(self.indices.get_unchecked(index))
-        }
+        self.access.get_unsync(self.indices.get(index))
     }
 }
 
