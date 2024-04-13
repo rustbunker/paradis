@@ -1,4 +1,4 @@
-use paradis_core::{IntoParAccess, ParAccess, LinearParAccess};
+use paradis_core::{IntoParAccess, LinearParAccess, ParAccess};
 
 #[test]
 fn test_basic_access() {

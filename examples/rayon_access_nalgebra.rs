@@ -28,7 +28,7 @@ impl<'a, T> DMatrixColParAccessMut<'a, T> {
 unsafe impl<'a, T> Send for DMatrixColParAccessMut<'a, T> {}
 unsafe impl<'a, T> Sync for DMatrixColParAccessMut<'a, T> {}
 
-unsafe impl<'a, T: Scalar> ParAccess for DMatrixColParAccessMut<'a, T> {
+unsafe impl<'a, T: Scalar> ParAccess<usize> for DMatrixColParAccessMut<'a, T> {
     type Record = DVectorViewMut<'a, T>;
 
     #[inline(always)]

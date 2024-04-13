@@ -29,7 +29,7 @@ pub mod slice;
 ///   same index in the collection if either record is mutable.
 ///
 /// TODO: Make the invariants more precise
-pub unsafe trait ParAccess<Index: Copy = usize>: Sync + Send {
+pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
     type Record;
 
     unsafe fn clone_access(&self) -> Self;

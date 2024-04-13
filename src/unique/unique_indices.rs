@@ -85,8 +85,7 @@ pub struct UniqueIndicesWithAccess<'a, Indices, Access> {
     pub(crate) access: Access,
 }
 
-unsafe impl<'a, Indices, Access> ParAccess<usize>
-    for UniqueIndicesWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> ParAccess<usize> for UniqueIndicesWithAccess<'a, Indices, Access>
 where
     Indices: UniqueIndices,
     Access: ParAccess<Indices::Index>,

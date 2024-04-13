@@ -21,9 +21,7 @@ impl<Access> LinearParAccessIter<Access> {
 }
 
 /// Creates a [`rayon`] parallel iterator for the provided linear parallel access.
-pub fn create_par_iter<IntoAccess>(
-    access: IntoAccess,
-) -> LinearParAccessIter<IntoAccess::Access>
+pub fn create_par_iter<IntoAccess>(access: IntoAccess) -> LinearParAccessIter<IntoAccess::Access>
 where
     IntoAccess: IntoParAccess,
     IntoAccess::Access: LinearParAccess,

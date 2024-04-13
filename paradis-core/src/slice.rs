@@ -12,7 +12,7 @@ pub struct ParSliceAccessMut<'a, T> {
 unsafe impl<'a, T: Sync> Sync for ParSliceAccessMut<'a, T> {}
 unsafe impl<'a, T: Send> Send for ParSliceAccessMut<'a, T> {}
 
-unsafe impl<'a, T: Sync + Send> ParAccess for ParSliceAccessMut<'a, T> {
+unsafe impl<'a, T: Sync + Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
     type Record = &'a mut T;
 
     #[inline(always)]
