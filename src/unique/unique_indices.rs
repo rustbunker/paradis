@@ -17,6 +17,18 @@ pub unsafe trait IndexList: Sync + Send {
     }
 }
 
+unsafe impl<'a, I: IndexList> IndexList for &'a I {
+    type Index = I::Index;
+
+    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
+        I::get_unchecked(self, loc)
+    }
+
+    fn num_indices(&self) -> usize {
+        I::num_indices(self)
+    }
+}
+
 /// A finite list of *unique* indices.
 pub unsafe trait UniqueIndexList: IndexList {
     /// Casts indices in this collection to the desired type.
@@ -69,6 +81,8 @@ pub unsafe trait UniqueIndexList: IndexList {
         IndexFlatten(self)
     }
 }
+
+unsafe impl<'a, I: UniqueIndexList> UniqueIndexList for &'a I {}
 
 /// An access object that has been narrowed to a subset of its index set.
 ///
