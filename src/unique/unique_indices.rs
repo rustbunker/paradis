@@ -1,4 +1,4 @@
-use crate::unique::combinators::{IndexProduct, IndexZip};
+use crate::unique::combinators::{IndexFlatten, IndexProduct, IndexZip};
 use crate::{IndexFrom, RecordIndex};
 use paradis_core::{LinearParAccess, ParAccess};
 use std::marker::PhantomData;
@@ -53,6 +53,16 @@ pub unsafe trait UniqueIndices: Sync + Send {
         Self: Sized,
     {
         IndexZip::new(self, other)
+    }
+
+    /// Flattens nested tuple indices.
+    ///
+    /// TODO: More docs, examples
+    fn index_flatten(self) -> IndexFlatten<Self>
+    where
+        Self: Sized,
+    {
+        IndexFlatten(self)
     }
 }
 
