@@ -1,3 +1,4 @@
+use crate::internal::Sealed;
 use crate::unique::unique_indices::IndexList;
 use crate::unique::UniqueIndexList;
 
@@ -31,15 +32,24 @@ where
 {
 }
 
-pub trait Concatenate<T> {
+/// Concatenate tuples.
+///
+/// This is part of the machinery that drives
+/// [UniqueIndexList::index_flatten][crate::unique::UniqueIndexList::index_flatten].
+pub trait Concatenate<T>: Sealed {
     type Concatenated;
 
     fn concatenate(self, other: T) -> Self::Concatenated;
 }
 
+/// The result of concatenating two types.
 pub type Concatenated<A, B> = <A as Concatenate<B>>::Concatenated;
 
-pub trait Flatten {
+/// Flatten nested tuples.
+///
+/// This is part of the machinery that drives
+/// [UniqueIndexList::index_flatten][crate::unique::UniqueIndexList::index_flatten].
+pub trait Flatten: Sealed {
     type Flattened;
 
     fn flatten(self) -> Self::Flattened;
