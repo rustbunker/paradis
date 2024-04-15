@@ -1,4 +1,5 @@
-use crate::unique::UniqueIndices;
+use crate::unique::unique_indices::IndexList;
+use crate::unique::UniqueIndexList;
 
 /// A Cartesian product of index sets.
 ///
@@ -9,10 +10,10 @@ use crate::unique::UniqueIndices;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IndexProduct<A, B>(pub A, pub B);
 
-unsafe impl<A, B> UniqueIndices for IndexProduct<A, B>
+unsafe impl<A, B> IndexList for IndexProduct<A, B>
 where
-    A: UniqueIndices,
-    B: UniqueIndices,
+    A: UniqueIndexList,
+    B: UniqueIndexList,
 {
     type Index = (A::Index, B::Index);
 
@@ -28,10 +29,17 @@ where
     }
 }
 
+unsafe impl<A, B> UniqueIndexList for IndexProduct<A, B>
+where
+    A: UniqueIndexList,
+    B: UniqueIndexList,
+{
+}
+
 #[cfg(test)]
 mod tests {
     use crate::unique::combinators::IndexProduct;
-    use crate::unique::UniqueIndices;
+    use crate::unique::unique_indices::IndexList;
 
     #[test]
     fn index_product_basic_tests() {

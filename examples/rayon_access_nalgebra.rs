@@ -1,6 +1,6 @@
 use nalgebra::{dmatrix, DMatrix, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::unique::{compose_access_with_indices, CheckedUniqueIndices, UniqueIndices};
+use paradis::unique::{compose_access_with_indices, CheckedIndexList, UniqueIndexList};
 use paradis::ParAccess;
 use paradis_core::LinearParAccess;
 use rayon::iter::ParallelIterator;
@@ -124,7 +124,7 @@ fn example_par_matrix_entries_iteration() {
 
     let indices = vec![(0, 0), (1, 0), (99, 100)];
     let checked_indices =
-        CheckedUniqueIndices::from_hashable_indices(indices.clone()).expect("All indices unique");
+        CheckedIndexList::from_hashable_indices(indices.clone()).expect("All indices unique");
 
     let access = compose_access_with_indices(matrix_access, &checked_indices);
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2.0);

@@ -1,4 +1,5 @@
-use crate::unique::UniqueIndices;
+use crate::unique::unique_indices::IndexList;
+use crate::unique::UniqueIndexList;
 
 /// The result of zipping two *equal-length* index sets.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -6,8 +7,8 @@ pub struct IndexZip<A, B>(A, B);
 
 impl<A, B> IndexZip<A, B>
 where
-    A: UniqueIndices,
-    B: UniqueIndices,
+    A: UniqueIndexList,
+    B: UniqueIndexList,
 {
     pub fn new(a: A, b: B) -> Self {
         assert_eq!(
@@ -20,10 +21,10 @@ where
 }
 
 // TODO: Test this impl
-unsafe impl<A, B> UniqueIndices for IndexZip<A, B>
+unsafe impl<A, B> IndexList for IndexZip<A, B>
 where
-    A: UniqueIndices,
-    B: UniqueIndices,
+    A: UniqueIndexList,
+    B: UniqueIndexList,
 {
     type Index = (A::Index, B::Index);
 
@@ -35,4 +36,11 @@ where
         debug_assert_eq!(self.0.num_indices(), self.1.num_indices());
         self.0.num_indices()
     }
+}
+
+unsafe impl<A, B> UniqueIndexList for IndexZip<A, B>
+where
+    A: UniqueIndexList,
+    B: UniqueIndexList,
+{
 }

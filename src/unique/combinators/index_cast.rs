@@ -1,19 +1,20 @@
-use crate::unique::UniqueIndices;
+use crate::unique::unique_indices::IndexList;
+use crate::unique::UniqueIndexList;
 use crate::{IndexFrom, RecordIndex};
 use std::marker::PhantomData;
 
 /// Cast indices in a source index list to the target index type.
 ///
-/// See [UniqueIndices::index_cast](crate::unique::UniqueIndices::index_cast).
+/// See [UniqueIndexList::index_cast](crate::unique::UniqueIndexList::index_cast).
 #[derive(Debug)]
 pub struct IndexCast<Indices, TargetIndex> {
     pub(crate) source_indices: Indices,
     pub(crate) marker: PhantomData<TargetIndex>,
 }
 
-unsafe impl<Indices, TargetIndex> UniqueIndices for IndexCast<Indices, TargetIndex>
+unsafe impl<Indices, TargetIndex> IndexList for IndexCast<Indices, TargetIndex>
 where
-    Indices: UniqueIndices,
+    Indices: UniqueIndexList,
     TargetIndex: Copy + RecordIndex + IndexFrom<Indices::Index>,
 {
     type Index = TargetIndex;
@@ -27,4 +28,11 @@ where
     fn num_indices(&self) -> usize {
         self.source_indices.num_indices()
     }
+}
+
+unsafe impl<Indices, TargetIndex> UniqueIndexList for IndexCast<Indices, TargetIndex>
+where
+    Indices: UniqueIndexList,
+    TargetIndex: Copy + RecordIndex + IndexFrom<Indices::Index>,
+{
 }

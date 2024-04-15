@@ -1,13 +1,14 @@
-use crate::unique::UniqueIndices;
+use crate::unique::unique_indices::IndexList;
+use crate::unique::UniqueIndexList;
 
 /// An index combinator that flattens nested tuples.
 ///
-/// See [UniqueIndices::index_flatten](crate::unique::UniqueIndices::index_flatten).
+/// See [UniqueIndexList::index_flatten](crate::unique::UniqueIndexList::index_flatten).
 pub struct IndexFlatten<SourceIndices>(pub(crate) SourceIndices);
 
-unsafe impl<SourceIndices> UniqueIndices for IndexFlatten<SourceIndices>
+unsafe impl<SourceIndices> IndexList for IndexFlatten<SourceIndices>
 where
-    SourceIndices: UniqueIndices,
+    SourceIndices: UniqueIndexList,
     SourceIndices::Index: Flatten,
     <SourceIndices::Index as Flatten>::Flattened: Copy,
 {
@@ -20,6 +21,14 @@ where
     fn num_indices(&self) -> usize {
         self.0.num_indices()
     }
+}
+
+unsafe impl<SourceIndices> UniqueIndexList for IndexFlatten<SourceIndices>
+where
+    SourceIndices: UniqueIndexList,
+    SourceIndices::Index: Flatten,
+    <SourceIndices::Index as Flatten>::Flattened: Copy,
+{
 }
 
 pub trait Concatenate<T> {

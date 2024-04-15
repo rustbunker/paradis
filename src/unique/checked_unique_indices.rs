@@ -1,9 +1,11 @@
-use crate::unique::UniqueIndices;
+use crate::unique::unique_indices::IndexList;
+use crate::unique::UniqueIndexList;
 use crate::RecordIndex;
 use std::collections::HashSet;
 use std::hash::Hash;
 
-pub struct CheckedUniqueIndices<Idx> {
+/// A list of indices that are checked to be unique.
+pub struct CheckedIndexList<Idx> {
     // TODO: Generalize to something like IndexContainer that supports e.g. Vec<Idx>, &[Idx]
     indices: Vec<Idx>,
 }
@@ -11,7 +13,7 @@ pub struct CheckedUniqueIndices<Idx> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NonUniqueIndex;
 
-impl<Idx: RecordIndex> CheckedUniqueIndices<Idx> {
+impl<Idx: RecordIndex> CheckedIndexList<Idx> {
     pub fn from_hashable_indices(indices: Vec<Idx>) -> Result<Self, NonUniqueIndex>
     where
         Idx: Hash,
@@ -26,7 +28,7 @@ impl<Idx: RecordIndex> CheckedUniqueIndices<Idx> {
     }
 }
 
-unsafe impl<Idx> UniqueIndices for CheckedUniqueIndices<Idx>
+unsafe impl<Idx> IndexList for CheckedIndexList<Idx>
 where
     Idx: RecordIndex + Send + Sync,
 {
@@ -40,3 +42,5 @@ where
         self.indices.len()
     }
 }
+
+unsafe impl<Idx> UniqueIndexList for CheckedIndexList<Idx> where Idx: RecordIndex + Send + Sync {}

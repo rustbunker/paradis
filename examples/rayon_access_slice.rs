@@ -1,5 +1,5 @@
 use paradis::rayon::create_par_iter;
-use paradis::unique::{compose_access_with_indices, CheckedUniqueIndices};
+use paradis::unique::{compose_access_with_indices, CheckedIndexList};
 use rayon::iter::ParallelIterator;
 
 fn main() {
@@ -22,7 +22,7 @@ fn example_with_checked_indices() {
     let mut data = vec![1.0; 10000];
     let indices = vec![900, 5, 10, 400, 1000, 100, 200];
     let checked_indices =
-        CheckedUniqueIndices::from_hashable_indices(indices.clone()).expect("All indices unique");
+        CheckedIndexList::from_hashable_indices(indices.clone()).expect("All indices unique");
 
     let access = compose_access_with_indices(data.as_mut_slice(), &checked_indices);
     create_par_iter(access).for_each(|x| *x *= 2.0);

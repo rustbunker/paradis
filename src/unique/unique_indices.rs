@@ -3,17 +3,22 @@ use crate::IndexFrom;
 use paradis_core::{LinearParAccess, ParAccess};
 use std::ops::{Range, RangeInclusive};
 
-pub unsafe trait UniqueIndices: Sync + Send {
+/// A finite list of indices.
+pub unsafe trait IndexList: Sync + Send {
     type Index: Copy;
 
-    unsafe fn get_unchecked(&self, i: usize) -> Self::Index;
+    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index;
+
     fn num_indices(&self) -> usize;
 
     fn get(&self, i: usize) -> Self::Index {
         assert!(i < self.num_indices(), "Index must be in bounds");
         unsafe { self.get_unchecked(i) }
     }
+}
 
+/// A finite list of *unique* indices.
+pub unsafe trait UniqueIndexList: IndexList {
     /// Casts indices in this collection to the desired type.
     ///
     /// This method is generally used to convert index types smaller than `usize` or `usize` tuples
@@ -31,7 +36,7 @@ pub unsafe trait UniqueIndices: Sync + Send {
     }
 
     /// Returns the Cartesian product of this index set with another set of (unique) indices.
-    fn index_product<I: UniqueIndices>(self, other: I) -> IndexProduct<Self, I>
+    fn index_product<I: UniqueIndexList>(self, other: I) -> IndexProduct<Self, I>
     where
         Self: Sized,
     {
@@ -47,7 +52,7 @@ pub unsafe trait UniqueIndices: Sync + Send {
     /// collection.
     ///
     /// TODO: Better docs
-    fn index_zip<I: UniqueIndices>(self, other: I) -> IndexZip<Self, I>
+    fn index_zip<I: UniqueIndexList>(self, other: I) -> IndexZip<Self, I>
     where
         Self: Sized,
     {
@@ -66,14 +71,14 @@ pub unsafe trait UniqueIndices: Sync + Send {
 }
 
 #[derive(Debug)]
-pub struct UniqueIndicesWithAccess<'a, Indices, Access> {
+pub struct UniqueIndexListWithAccess<'a, Indices, Access> {
     pub(crate) indices: &'a Indices,
     pub(crate) access: Access,
 }
 
-unsafe impl<'a, Indices, Access> ParAccess<usize> for UniqueIndicesWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> ParAccess<usize> for UniqueIndexListWithAccess<'a, Indices, Access>
 where
-    Indices: UniqueIndices,
+    Indices: UniqueIndexList,
     Access: ParAccess<Indices::Index>,
 {
     type Record = Access::Record;
@@ -106,9 +111,9 @@ where
     }
 }
 
-unsafe impl<'a, Indices, Access> LinearParAccess for UniqueIndicesWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> LinearParAccess for UniqueIndexListWithAccess<'a, Indices, Access>
 where
-    Indices: UniqueIndices,
+    Indices: UniqueIndexList,
     Access: ParAccess<Indices::Index>,
 {
     #[inline(always)]
@@ -117,7 +122,7 @@ where
     }
 }
 
-unsafe impl UniqueIndices for Range<usize> {
+unsafe impl IndexList for Range<usize> {
     type Index = usize;
 
     unsafe fn get_unchecked(&self, i: usize) -> usize {
@@ -129,7 +134,9 @@ unsafe impl UniqueIndices for Range<usize> {
     }
 }
 
-unsafe impl UniqueIndices for RangeInclusive<usize> {
+unsafe impl UniqueIndexList for Range<usize> {}
+
+unsafe impl IndexList for RangeInclusive<usize> {
     type Index = usize;
 
     unsafe fn get_unchecked(&self, i: usize) -> usize {
@@ -140,3 +147,5 @@ unsafe impl UniqueIndices for RangeInclusive<usize> {
         self.clone().count()
     }
 }
+
+unsafe impl UniqueIndexList for RangeInclusive<usize> {}
