@@ -83,7 +83,6 @@ impl Flatten for usize {
     }
 }
 
-
 impl<A: Flatten> Flatten for (A,) {
     type Flattened = (A::Flattened,);
 
@@ -106,7 +105,7 @@ where
 impl<A: Flatten, B: Flatten, C: Flatten> Flatten for (A, B, C)
 where
     (A, B): Flatten,
-    <(A, B) as Flatten>::Flattened: Concatenate<C::Flattened>
+    <(A, B) as Flatten>::Flattened: Concatenate<C::Flattened>,
 {
     type Flattened = Concatenated<<(A, B) as Flatten>::Flattened, C::Flattened>;
 
@@ -118,23 +117,27 @@ where
 impl<A: Flatten, B: Flatten, C: Flatten, D: Flatten> Flatten for (A, B, C, D)
 where
     (A, B, C): Flatten,
-    <(A, B, C) as Flatten>::Flattened: Concatenate<D::Flattened>
+    <(A, B, C) as Flatten>::Flattened: Concatenate<D::Flattened>,
 {
     type Flattened = Concatenated<<(A, B, C) as Flatten>::Flattened, D::Flattened>;
 
     fn flatten(self) -> Self::Flattened {
-        (self.0, self.1, self.2).flatten().concatenate(self.3.flatten())
+        (self.0, self.1, self.2)
+            .flatten()
+            .concatenate(self.3.flatten())
     }
 }
 
 impl<A: Flatten, B: Flatten, C: Flatten, D: Flatten, E: Flatten> Flatten for (A, B, C, D, E)
 where
     (A, B, C, D): Flatten,
-    <(A, B, C, D) as Flatten>::Flattened: Concatenate<E::Flattened>
+    <(A, B, C, D) as Flatten>::Flattened: Concatenate<E::Flattened>,
 {
     type Flattened = Concatenated<<(A, B, C, D) as Flatten>::Flattened, E::Flattened>;
 
     fn flatten(self) -> Self::Flattened {
-        (self.0, self.1, self.2, self.3).flatten().concatenate(self.4.flatten())
+        (self.0, self.1, self.2, self.3)
+            .flatten()
+            .concatenate(self.4.flatten())
     }
 }

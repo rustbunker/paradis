@@ -1,2 +1,2 @@
-mod unique;
 mod slice;
+mod unique;
