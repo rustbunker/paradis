@@ -9,7 +9,8 @@ mod unique_indices;
 pub use checked_unique_indices::CheckedIndexList;
 pub use unique_indices::{IndexList, IndexedAccess, UniqueIndexList};
 
-pub fn compose_access_with_indices<IntoAccess, Indices>(
+/// Narrows an access object to a subset of its index set.
+pub fn narrow_access_to_indices<IntoAccess, Indices>(
     access: IntoAccess,
     indices: &Indices,
 ) -> IndexedAccess<'_, Indices, IntoAccess::Access>

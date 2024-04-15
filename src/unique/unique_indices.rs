@@ -73,7 +73,7 @@ pub unsafe trait UniqueIndexList: IndexList {
 /// An access object that has been narrowed to a subset of its index set.
 ///
 /// This is the result type for
-/// [compose_access_with_indices](crate::unique::compose_access_with_indices).
+/// [compose_access_with_indices](crate::unique::narrow_access_to_indices).
 #[derive(Debug)]
 pub struct IndexedAccess<'a, Indices, Access> {
     pub(crate) indices: &'a Indices,

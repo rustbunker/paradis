@@ -1,5 +1,5 @@
 use paradis::rayon::create_par_iter;
-use paradis::unique::{compose_access_with_indices, UniqueIndexList};
+use paradis::unique::{narrow_access_to_indices, UniqueIndexList};
 use paradis_core::ParAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
@@ -22,7 +22,7 @@ fn main() {
             .index_product(0..2)
             // Flatten nested tuple to (usize, usize, usize, usize)
             .index_flatten();
-        let access = compose_access_with_indices(access, &indices);
+        let access = narrow_access_to_indices(access, &indices);
         create_par_iter(access).for_each(|a_ijkl| *a_ijkl *= 2);
 
         assert_eq!(
@@ -50,7 +50,7 @@ fn main() {
             .index_flatten();
 
         // Restrict the parallel access to our selected indices
-        let access = compose_access_with_indices(access, &indices);
+        let access = narrow_access_to_indices(access, &indices);
         create_par_iter(access).for_each(|a_ijkl| *a_ijkl *= 2);
 
         assert_eq!(

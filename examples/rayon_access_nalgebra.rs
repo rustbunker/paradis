@@ -1,6 +1,6 @@
 use nalgebra::{dmatrix, DMatrix, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::unique::{compose_access_with_indices, CheckedIndexList, UniqueIndexList};
+use paradis::unique::{narrow_access_to_indices, CheckedIndexList, UniqueIndexList};
 use paradis::ParAccess;
 use paradis_core::LinearParAccess;
 use rayon::iter::ParallelIterator;
@@ -126,7 +126,7 @@ fn example_par_matrix_entries_iteration() {
     let checked_indices =
         CheckedIndexList::from_hashable_indices(indices.clone()).expect("All indices unique");
 
-    let access = compose_access_with_indices(matrix_access, &checked_indices);
+    let access = narrow_access_to_indices(matrix_access, &checked_indices);
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2.0);
 
     for (i, j) in (0..m).zip(0..n) {
@@ -148,7 +148,7 @@ fn example_par_matrix_submatrix_iteration() {
 
     // The 2x2 submatrix starting at (1, 2) can be described by a Cartesian product of index ranges
     let indices = (1..=2).index_product(2..=3);
-    let access = compose_access_with_indices(matrix_access, &indices);
+    let access = narrow_access_to_indices(matrix_access, &indices);
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
 
     assert_eq!(
@@ -168,7 +168,7 @@ fn example_par_matrix_superdiagonal_iteration() {
 
     // The first superdiagonal corresponds to zipping two index sets
     let superdiagonal_indices = (0..3).index_zip(1..4);
-    let access = compose_access_with_indices(matrix_access, &superdiagonal_indices);
+    let access = narrow_access_to_indices(matrix_access, &superdiagonal_indices);
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
 
     assert_eq!(
