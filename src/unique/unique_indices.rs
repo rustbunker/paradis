@@ -1,7 +1,6 @@
-use crate::unique::combinators::{IndexFlatten, IndexProduct, IndexZip};
-use crate::{IndexFrom, RecordIndex};
+use crate::unique::combinators::{IndexCast, IndexFlatten, IndexProduct, IndexZip};
+use crate::IndexFrom;
 use paradis_core::{LinearParAccess, ParAccess};
-use std::marker::PhantomData;
 use std::ops::{Range, RangeInclusive};
 
 pub unsafe trait UniqueIndices: Sync + Send {
@@ -20,12 +19,12 @@ pub unsafe trait UniqueIndices: Sync + Send {
     /// This method is generally used to convert index types smaller than `usize` or `usize` tuples
     /// to `usize` tuples. For example, a collection of `(u32, u32)` might be used as
     /// indices into a matrix data structure that can be indexed by `(usize, usize)`.
-    fn cast_index_type<TargetIndex>(self) -> UniqueIndicesConvertedType<Self, TargetIndex>
+    fn index_cast<TargetIndex>(self) -> IndexCast<Self, TargetIndex>
     where
         Self: Sized,
         TargetIndex: Copy + IndexFrom<Self::Index>,
     {
-        UniqueIndicesConvertedType {
+        IndexCast {
             source_indices: self,
             marker: Default::default(),
         }
@@ -63,29 +62,6 @@ pub unsafe trait UniqueIndices: Sync + Send {
         Self: Sized,
     {
         IndexFlatten(self)
-    }
-}
-
-pub struct UniqueIndicesConvertedType<Indices, TargetIndex> {
-    source_indices: Indices,
-    marker: PhantomData<TargetIndex>,
-}
-
-unsafe impl<Indices, TargetIndex> UniqueIndices for UniqueIndicesConvertedType<Indices, TargetIndex>
-where
-    Indices: UniqueIndices,
-    TargetIndex: Copy + RecordIndex + IndexFrom<Indices::Index>,
-{
-    type Index = TargetIndex;
-
-    unsafe fn get_unchecked(&self, i: usize) -> Self::Index {
-        // TODO: Cannot use TryFrom since it's not guaranteed to be
-        let source_idx = self.source_indices.get_unchecked(i);
-        TargetIndex::index_from(source_idx)
-    }
-
-    fn num_indices(&self) -> usize {
-        self.source_indices.num_indices()
     }
 }
 

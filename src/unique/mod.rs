@@ -7,7 +7,7 @@ mod checked_unique_indices;
 mod unique_indices;
 
 pub use checked_unique_indices::CheckedUniqueIndices;
-pub use unique_indices::{UniqueIndices, UniqueIndicesConvertedType, UniqueIndicesWithAccess};
+pub use unique_indices::{UniqueIndices, UniqueIndicesWithAccess};
 
 pub fn compose_access_with_indices<IntoAccess, Indices>(
     access: IntoAccess,

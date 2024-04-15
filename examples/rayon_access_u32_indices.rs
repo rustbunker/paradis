@@ -12,7 +12,7 @@ fn example_with_checked_indices_u32() {
     let indices: Vec<u32> = vec![900, 5, 10, 400, 1000, 100, 200];
     let checked_indices = CheckedUniqueIndices::from_hashable_indices(indices.clone())
         .expect("All indices unique")
-        .cast_index_type();
+        .index_cast();
 
     let access = compose_access_with_indices(data.as_mut_slice(), &checked_indices);
     create_par_iter(access).for_each(|x| *x *= 2.0);
