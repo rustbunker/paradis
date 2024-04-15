@@ -70,13 +70,17 @@ pub unsafe trait UniqueIndexList: IndexList {
     }
 }
 
+/// An access object that has been narrowed to a subset of its index set.
+///
+/// This is the result type for
+/// [compose_access_with_indices](crate::unique::compose_access_with_indices).
 #[derive(Debug)]
-pub struct UniqueIndexListWithAccess<'a, Indices, Access> {
+pub struct IndexedAccess<'a, Indices, Access> {
     pub(crate) indices: &'a Indices,
     pub(crate) access: Access,
 }
 
-unsafe impl<'a, Indices, Access> ParAccess<usize> for UniqueIndexListWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> ParAccess<usize> for IndexedAccess<'a, Indices, Access>
 where
     Indices: UniqueIndexList,
     Access: ParAccess<Indices::Index>,
@@ -111,7 +115,7 @@ where
     }
 }
 
-unsafe impl<'a, Indices, Access> LinearParAccess for UniqueIndexListWithAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> LinearParAccess for IndexedAccess<'a, Indices, Access>
 where
     Indices: UniqueIndexList,
     Access: ParAccess<Indices::Index>,
