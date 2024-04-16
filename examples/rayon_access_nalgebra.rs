@@ -1,6 +1,6 @@
 use nalgebra::{dmatrix, DMatrix, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::unique::{narrow_access_to_indices, CheckedIndexList, UniqueIndexList};
+use paradis::unique::{narrow_access_to_indices, CheckedIndexList, Repeat, UniqueIndexList};
 use paradis::ParAccess;
 use paradis_core::LinearParAccess;
 use rayon::iter::ParallelIterator;
@@ -113,6 +113,7 @@ fn main() {
     example_par_matrix_submatrix_iteration();
     example_par_matrix_superdiagonal_iteration();
     example_par_column_iteration();
+    example_par_select_single_col();
 }
 
 fn example_par_matrix_entries_iteration() {
@@ -197,4 +198,22 @@ fn example_par_column_iteration() {
     });
 
     assert!(matrix.iter().all(|&x| x == 4.0));
+}
+
+fn example_par_select_single_col() {
+    let mut matrix = dmatrix![ 0,  1,  2,  3,  4;
+                               5,  6,  7,  8,  9;
+                              10, 11, 12, 13, 14 ];
+    let indices = (0..3).index_zip(Repeat::value(1).times(3));
+    let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
+    let access = narrow_access_to_indices(access, &indices);
+
+    create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
+
+    assert_eq!(
+        matrix,
+        dmatrix![ 0,  2,  2,  3,  4;
+                  5, 12,  7,  8,  9;
+                 10, 22, 12, 13, 14 ]
+    )
 }

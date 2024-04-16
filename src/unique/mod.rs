@@ -4,9 +4,11 @@ use paradis_core::IntoParAccess;
 pub mod combinators;
 
 mod checked_unique_indices;
+mod repeat;
 mod unique_indices;
 
 pub use checked_unique_indices::CheckedIndexList;
+pub use repeat::Repeat;
 pub use unique_indices::{IndexList, IndexedAccess, UniqueIndexList};
 
 /// Narrows an access object to a subset of its index set.

@@ -64,7 +64,7 @@ pub unsafe trait UniqueIndexList: IndexList {
     /// collection.
     ///
     /// TODO: Better docs
-    fn index_zip<I: UniqueIndexList>(self, other: I) -> IndexZip<Self, I>
+    fn index_zip<I: IndexList>(self, other: I) -> IndexZip<Self, I>
     where
         Self: Sized,
     {
