@@ -37,7 +37,9 @@ fn slice_baseline_access(bencher: Bencher, n: usize) {
     });
 }
 
-/// Get baseline numbers for "redundantly indexed" access
+/// Get baseline numbers for "redundantly indexed" access.
+/// Ideally this should compile down to basically the same as
+/// the standard Rayon parallel iterator.
 #[divan::bench(
     args = [1_000_000, 10_000_000, 100_000_000]
 )]
