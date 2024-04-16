@@ -1,4 +1,4 @@
-use crate::internal;
+use crate::internal::Sealed;
 
 /// A type suitable for use as an index into a collection of records.
 ///
@@ -8,7 +8,7 @@ use crate::internal;
 /// TODO: I'm not sure if it's necessary to seal this trait, but until someone comes up with
 /// a compelling use case that requires implementing this trait outside of this crate,
 /// it's convenient to do so.
-pub unsafe trait RecordIndex: internal::Sealed + Eq + Copy + Send + Sync {}
+pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {}
 
 unsafe impl RecordIndex for usize {}
 
