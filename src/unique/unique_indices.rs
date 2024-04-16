@@ -48,7 +48,7 @@ pub unsafe trait UniqueIndexList: IndexList {
     }
 
     /// Returns the Cartesian product of this index set with another set of (unique) indices.
-    fn index_product<I: UniqueIndexList>(self, other: I) -> IndexProduct<Self, I>
+    fn index_product<I: IndexList>(self, other: I) -> IndexProduct<Self, I>
     where
         Self: Sized,
     {

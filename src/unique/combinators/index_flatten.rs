@@ -9,7 +9,7 @@ pub struct IndexFlatten<SourceIndices>(pub(crate) SourceIndices);
 
 unsafe impl<SourceIndices> IndexList for IndexFlatten<SourceIndices>
 where
-    SourceIndices: UniqueIndexList,
+    SourceIndices: IndexList,
     SourceIndices::Index: Flatten,
     <SourceIndices::Index as Flatten>::Flattened: Copy,
 {

@@ -14,7 +14,7 @@ pub struct IndexCast<Indices, TargetIndex> {
 
 unsafe impl<Indices, TargetIndex> IndexList for IndexCast<Indices, TargetIndex>
 where
-    Indices: UniqueIndexList,
+    Indices: IndexList,
     TargetIndex: Copy + RecordIndex + IndexFrom<Indices::Index>,
 {
     type Index = TargetIndex;

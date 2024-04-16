@@ -12,8 +12,8 @@ pub struct IndexProduct<A, B>(pub A, pub B);
 
 unsafe impl<A, B> IndexList for IndexProduct<A, B>
 where
-    A: UniqueIndexList,
-    B: UniqueIndexList,
+    A: IndexList,
+    B: IndexList,
 {
     type Index = (A::Index, B::Index);
 

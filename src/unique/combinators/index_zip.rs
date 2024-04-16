@@ -15,7 +15,7 @@ pub struct IndexZip<A, B>(A, B);
 
 impl<A, B> IndexZip<A, B>
 where
-    A: UniqueIndexList,
+    A: IndexList,
     B: IndexList,
 {
     pub fn new(a: A, b: B) -> Self {
@@ -31,7 +31,7 @@ where
 // TODO: Test this impl
 unsafe impl<A, B> IndexList for IndexZip<A, B>
 where
-    A: UniqueIndexList,
+    A: IndexList,
     B: IndexList,
 {
     type Index = (A::Index, B::Index);
@@ -48,6 +48,11 @@ where
 
 unsafe impl<A, B> UniqueIndexList for IndexZip<A, B>
 where
+    // TODO: IndexZip would satisfy UniqueIndexList if *either* A or B
+    // has unique indices. However, we are unable to
+    // express this in Rust's type system as this would require specialization
+    // or at least lattice impls
+    // We still need a way for users to work around this though
     A: UniqueIndexList,
     B: IndexList,
 {
