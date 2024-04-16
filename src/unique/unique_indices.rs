@@ -1,4 +1,4 @@
-use crate::unique::combinators::{IndexCast, IndexFlatten, IndexProduct, IndexZip};
+use crate::unique::combinators::{IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip};
 use crate::IndexFrom;
 use paradis_core::{LinearParAccess, ParAccess};
 use std::ops::{Range, RangeInclusive};
@@ -64,6 +64,16 @@ pub unsafe trait IndexList: Sync + Send {
         Self: Sized,
     {
         IndexFlatten(self)
+    }
+
+    /// Transposes the indices in this index list.
+    ///
+    /// TODO: Examples
+    fn index_transpose(self) -> IndexTranspose<Self>
+    where
+        Self: Sized,
+    {
+        IndexTranspose(self)
     }
 }
 

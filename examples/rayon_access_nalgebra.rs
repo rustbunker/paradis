@@ -114,6 +114,7 @@ fn main() {
     example_par_matrix_superdiagonal_iteration();
     example_par_column_iteration();
     example_par_select_single_col();
+    example_par_select_single_row();
 }
 
 fn example_par_matrix_entries_iteration() {
@@ -215,5 +216,36 @@ fn example_par_select_single_col() {
         dmatrix![ 0,  2,  2,  3,  4;
                   5, 12,  7,  8,  9;
                  10, 22, 12, 13, 14 ]
+    )
+}
+
+fn example_par_select_single_row() {
+    let mut matrix = dmatrix![ 0,  1,  2,  3,  4;
+                               5,  6,  7,  8,  9;
+                              10, 11, 12, 13, 14 ];
+
+    // Select all the indices in row 1
+    // Ideally, we'd be able to write the commented code ...
+    // let indices = Repeat::value(1)
+    //     .times(5)
+    //     .index_zip(0 .. 5);
+    // but unfortunately this is not possible due to limitations of Rust's type system
+    // so instead we specify the indices in the transposed order and then transpose them again
+    // See the docs for index zipping for more details
+    // TODO: Find a better workaround for this
+    let indices = (0..5)
+        .index_zip(Repeat::value(1).times(5))
+        .index_transpose();
+
+    let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
+    let access = narrow_access_to_indices(access, &indices);
+
+    create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
+
+    assert_eq!(
+        matrix,
+        dmatrix![ 0,  1,  2,  3,  4;
+                 10, 12, 14, 16, 18;
+                 10, 11, 12, 13, 14 ]
     )
 }
