@@ -27,8 +27,14 @@ required-features = [ "rayon" ]
 ## like this is possible?
 nalgebra = { version = "0.32.1" }
 
+divan = "0.1.14"
+
 [workspace]
 members = [ "paradis-core" ]
+
+[[bench]]
+name = "parallel_iteration"
+harness = false
 
 [package.metadata.docs.rs]
 features = [ "rayon" ]
