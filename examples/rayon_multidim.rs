@@ -1,5 +1,5 @@
 use paradis::rayon::create_par_iter;
-use paradis::unique::{narrow_access_to_indices, UniqueIndexList};
+use paradis::unique::{narrow_access_to_indices, IndexList};
 use paradis_core::ParAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;

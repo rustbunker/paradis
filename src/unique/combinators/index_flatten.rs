@@ -4,7 +4,7 @@ use crate::unique::UniqueIndexList;
 
 /// An index combinator that flattens nested tuples.
 ///
-/// See [UniqueIndexList::index_flatten](crate::unique::UniqueIndexList::index_flatten).
+/// See [IndexList::index_flatten](crate::unique::IndexList::index_flatten).
 pub struct IndexFlatten<SourceIndices>(pub(crate) SourceIndices);
 
 unsafe impl<SourceIndices> IndexList for IndexFlatten<SourceIndices>
@@ -35,7 +35,7 @@ where
 /// Concatenate tuples.
 ///
 /// This is part of the machinery that drives
-/// [UniqueIndexList::index_flatten][crate::unique::UniqueIndexList::index_flatten].
+/// [IndexList::index_flatten][crate::unique::IndexList::index_flatten].
 pub trait Concatenate<T>: Sealed {
     type Concatenated;
 
@@ -48,7 +48,7 @@ pub type Concatenated<A, B> = <A as Concatenate<B>>::Concatenated;
 /// Flatten nested tuples.
 ///
 /// This is part of the machinery that drives
-/// [UniqueIndexList::index_flatten][crate::unique::UniqueIndexList::index_flatten].
+/// [IndexList::index_flatten][crate::unique::IndexList::index_flatten].
 pub trait Flatten: Sealed {
     type Flattened;
 

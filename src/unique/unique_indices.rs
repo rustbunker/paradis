@@ -15,22 +15,7 @@ pub unsafe trait IndexList: Sync + Send {
         assert!(i < self.num_indices(), "Index must be in bounds");
         unsafe { self.get_unchecked(i) }
     }
-}
 
-unsafe impl<'a, I: IndexList> IndexList for &'a I {
-    type Index = I::Index;
-
-    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
-        I::get_unchecked(self, loc)
-    }
-
-    fn num_indices(&self) -> usize {
-        I::num_indices(self)
-    }
-}
-
-/// A finite list of *unique* indices.
-pub unsafe trait UniqueIndexList: IndexList {
     /// Casts indices in this collection to the desired type.
     ///
     /// This method is generally used to convert index types smaller than `usize` or `usize` tuples
@@ -81,6 +66,23 @@ pub unsafe trait UniqueIndexList: IndexList {
         IndexFlatten(self)
     }
 }
+
+unsafe impl<'a, I: IndexList> IndexList for &'a I {
+    type Index = I::Index;
+
+    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
+        I::get_unchecked(self, loc)
+    }
+
+    fn num_indices(&self) -> usize {
+        I::num_indices(self)
+    }
+}
+
+/// A finite list of *unique* indices.
+///
+/// TODO: Document requirements
+pub unsafe trait UniqueIndexList: IndexList {}
 
 unsafe impl<'a, I: UniqueIndexList> UniqueIndexList for &'a I {}
 

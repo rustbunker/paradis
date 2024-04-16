@@ -1,5 +1,5 @@
 use paradis::rayon::create_par_iter;
-use paradis::unique::UniqueIndexList;
+use paradis::unique::IndexList;
 use paradis::unique::{narrow_access_to_indices, CheckedIndexList};
 use rayon::iter::ParallelIterator;
 

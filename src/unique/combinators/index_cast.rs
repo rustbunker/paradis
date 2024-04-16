@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 
 /// Cast indices in a source index list to the target index type.
 ///
-/// See [UniqueIndexList::index_cast](crate::unique::UniqueIndexList::index_cast).
+/// See [IndexList::index_cast](crate::unique::IndexList::index_cast).
 #[derive(Debug)]
 pub struct IndexCast<Indices, TargetIndex> {
     pub(crate) source_indices: Indices,

@@ -1,6 +1,6 @@
 use nalgebra::{dmatrix, DMatrix, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::unique::{narrow_access_to_indices, CheckedIndexList, Repeat, UniqueIndexList};
+use paradis::unique::{narrow_access_to_indices, CheckedIndexList, IndexList, Repeat};
 use paradis::ParAccess;
 use paradis_core::LinearParAccess;
 use rayon::iter::ParallelIterator;
