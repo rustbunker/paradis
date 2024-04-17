@@ -9,7 +9,7 @@ pub mod unique;
 mod index_from;
 
 pub use index_from::IndexFrom;
-pub use paradis_core::{slice, IntoParAccess, LinearParAccess, ParAccess, RecordIndex};
+pub use paradis_core::{slice, Bounds, IntoParAccess, LinearParAccess, ParAccess, RecordIndex};
 
 mod internal {
     pub trait Sealed {}
