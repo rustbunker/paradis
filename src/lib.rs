@@ -2,6 +2,7 @@
 //!
 //! **VERY EXPERIMENTAL, DO NOT USE**.
 
+pub mod iter;
 #[cfg(feature = "rayon")]
 pub mod rayon;
 pub mod unique;
