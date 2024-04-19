@@ -121,7 +121,7 @@ where
         }
     }
 
-    #[inline(always)]
+    #[inline]
     fn in_bounds(&self, index: usize) -> bool {
         let in_bounds_in_index_list = index < self.indices.num_indices();
         if in_bounds_in_index_list {
@@ -155,10 +155,12 @@ where
 unsafe impl IndexList for Range<usize> {
     type Index = usize;
 
+    #[inline(always)]
     unsafe fn get_unchecked(&self, i: usize) -> usize {
         self.start + i
     }
 
+    #[inline(always)]
     fn num_indices(&self) -> usize {
         self.end.saturating_sub(self.start)
     }
@@ -169,10 +171,12 @@ unsafe impl UniqueIndexList for Range<usize> {}
 unsafe impl IndexList for RangeInclusive<usize> {
     type Index = usize;
 
+    #[inline(always)]
     unsafe fn get_unchecked(&self, i: usize) -> usize {
         self.start() + i
     }
 
+    #[inline(always)]
     fn num_indices(&self) -> usize {
         self.clone().count()
     }
