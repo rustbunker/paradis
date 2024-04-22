@@ -45,7 +45,6 @@ fn slice_baseline_rayon(bencher: Bencher, (n, num_threads): (usize, usize)) {
         || {
             black_box(&mut data)
                 .par_iter_mut()
-                .with_min_len(100000)
                 .for_each(|x| *x *= factor);
         });
 }
@@ -62,7 +61,6 @@ fn slice_baseline_access(bencher: Bencher, (n, num_threads): (usize, usize)) {
         || {
             let access = black_box(data.as_mut_slice()).into_par_access();
             create_par_iter(access)
-                .with_min_len(100000)
                 .for_each(|x| *x *= factor);
         });
 }
@@ -83,7 +81,6 @@ fn slice_redundantly_indexed_access(bencher: Bencher, (n, num_threads): (usize, 
             let indices = 0..n;
             let access = narrow_access_to_indices(access, &indices);
             create_par_iter(access)
-                .with_min_len(10000)
                 .for_each(|x| *x *= factor);
         });
 }
@@ -103,7 +100,6 @@ fn slice_subset_indexed_access(bencher: Bencher, (n, num_threads): (usize, usize
             let access = black_box(data.as_mut_slice()).into_par_access();
             let access = narrow_access_to_indices(access, &indices);
             create_par_iter(access)
-                .with_min_len(10000)
                 .for_each(|x| *x *= factor);
         });
 }
@@ -125,7 +121,6 @@ fn slice_subset_unsafe_access(bencher: Bencher, (n, num_threads): (usize, usize)
 
             indices
                 .par_iter()
-                .with_min_len(10000)
                 .for_each(|idx| unsafe { *access.get_unsync_unchecked(*idx) *= factor });
         });
 }
