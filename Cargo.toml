@@ -36,5 +36,14 @@ members = [ "paradis-core" ]
 name = "parallel_iteration"
 harness = false
 
+[[bench]]
+name = "single_thread_iter"
+harness = false
+
 [package.metadata.docs.rs]
 features = [ "rayon" ]
+
+[profile.bench]
+lto = "thin"
+codegen-units = 1
+debug = true
