@@ -277,5 +277,4 @@ mod tests {
         assert!(!<(usize, usize, usize)>::contains_bounds(&Bounds { offset: (0, 0, 0), extent: (2, 2, 2) },
                                                           &Bounds { offset: (2, 2, 2), extent: (1, 1, 1) }));
     }
-
 }

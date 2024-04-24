@@ -3,10 +3,14 @@ use paradis_core::{IntoParAccess, LinearParAccess};
 pub fn create_iter<IntoAccess>(access: IntoAccess) -> AccessIterator<IntoAccess::Access>
 where
     IntoAccess: IntoParAccess<usize>,
-    IntoAccess::Access: LinearParAccess
+    IntoAccess::Access: LinearParAccess,
 {
     let access = access.into_par_access();
-    AccessIterator { next_idx: 0, len: access.len(), access }
+    AccessIterator {
+        next_idx: 0,
+        len: access.len(),
+        access,
+    }
 }
 
 #[derive(Debug)]
@@ -19,7 +23,7 @@ pub struct AccessIterator<Access> {
 
 impl<Access> Iterator for AccessIterator<Access>
 where
-    Access: LinearParAccess
+    Access: LinearParAccess,
 {
     type Item = Access::Record;
 

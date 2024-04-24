@@ -1,8 +1,8 @@
 use divan::Bencher;
-use std::hint::black_box;
 use paradis::iter::create_iter;
 use paradis::unique::narrow_access_to_indices;
 use paradis_core::IntoParAccess;
+use std::hint::black_box;
 
 fn main() {
     divan::main()
@@ -44,7 +44,7 @@ fn slice_redundantly_indexed_access(bencher: Bencher, n: usize) {
     let factor = black_box(2);
 
     bencher.bench_local(|| {
-        let indices = 0 .. n;
+        let indices = 0..n;
         let access = black_box(&mut data).into_par_access();
         let access = narrow_access_to_indices(access, &indices);
         for elem in create_iter(access) {
