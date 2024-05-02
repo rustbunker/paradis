@@ -1,6 +1,6 @@
-use paradis_core::Bounds;
 use crate::unique::IndexList;
 use crate::RecordIndex;
+use paradis_core::Bounds;
 
 /// An index list consisting of an index repeated a finite number of times.
 #[derive(Debug, Clone)]

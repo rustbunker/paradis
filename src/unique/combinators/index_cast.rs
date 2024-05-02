@@ -1,8 +1,8 @@
 use crate::unique::unique_indices::IndexList;
 use crate::unique::UniqueIndexList;
 use crate::{IndexFrom, RecordIndex};
-use std::marker::PhantomData;
 use paradis_core::Bounds;
+use std::marker::PhantomData;
 
 /// Cast indices in a source index list to the target index type.
 ///
@@ -32,13 +32,10 @@ where
     }
 
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
-        self.source_indices
-            .bounds()
-            .map(|bounds| Bounds {
-                offset: TargetIndex::index_from(bounds.offset),
-                extent: TargetIndex::index_from(bounds.extent),
-            })
-
+        self.source_indices.bounds().map(|bounds| Bounds {
+            offset: TargetIndex::index_from(bounds.offset),
+            extent: TargetIndex::index_from(bounds.extent),
+        })
     }
 }
 

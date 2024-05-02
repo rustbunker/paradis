@@ -145,9 +145,9 @@ where
         let access = self.access;
 
         callback.callback(AccessProducer {
-                start_idx: 0,
-                end_idx: access.len(),
-                access,
+            start_idx: 0,
+            end_idx: access.len(),
+            access,
         })
     }
 }

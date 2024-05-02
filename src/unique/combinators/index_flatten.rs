@@ -1,7 +1,7 @@
-use paradis_core::Bounds;
 use crate::internal::Sealed;
 use crate::unique::unique_indices::IndexList;
 use crate::unique::UniqueIndexList;
+use paradis_core::Bounds;
 
 /// An index combinator that flattens nested tuples.
 ///
@@ -26,11 +26,10 @@ where
     }
 
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
-        self.0.bounds()
-            .map(|bounds| Bounds {
-                offset: bounds.offset.flatten(),
-                extent: bounds.extent.flatten()
-            })
+        self.0.bounds().map(|bounds| Bounds {
+            offset: bounds.offset.flatten(),
+            extent: bounds.extent.flatten(),
+        })
     }
 }
 

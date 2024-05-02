@@ -1,9 +1,9 @@
-use std::any::type_name;
 use crate::unique::combinators::{IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip};
+use crate::unique::OutOfBounds;
 use crate::IndexFrom;
 use paradis_core::{Bounds, LinearParAccess, ParAccess, RecordIndex};
+use std::any::type_name;
 use std::ops::{Range, RangeInclusive};
-use crate::unique::OutOfBounds;
 
 /// A finite list of indices.
 pub unsafe trait IndexList: Sync + Send {
@@ -130,19 +130,25 @@ impl<'a, Indices, Access> IndexedAccess<'a, Indices, Access>
 where
     Indices: IndexList,
     Indices::Index: RecordIndex,
-    Access: ParAccess<Indices::Index>
+    Access: ParAccess<Indices::Index>,
 {
     pub(crate) fn try_new(indices: &'a Indices, access: Access) -> Result<Self, OutOfBounds> {
         if let Some(index_bounds) = indices.bounds() {
             if access.bounds().contains_bounds(&index_bounds) {
-                Ok(Self { indices, access, verified_in_bounds: true })
+                Ok(Self {
+                    indices,
+                    access,
+                    verified_in_bounds: true,
+                })
             } else {
                 Err(OutOfBounds)
             }
         } else {
-            assert!(!Indices::ALWAYS_BOUNDED,
-                    "IndexList {} claims that it is ALWAYS_BOUNDED, but no bounds were returned",
-                    type_name::<Indices>());
+            assert!(
+                !Indices::ALWAYS_BOUNDED,
+                "IndexList {} claims that it is ALWAYS_BOUNDED, but no bounds were returned",
+                type_name::<Indices>()
+            );
 
             // In this case, bounds are not available, so we can not say
             // whether all indices in bounds. This means that we might panic
@@ -174,7 +180,10 @@ where
     }
 
     fn bounds(&self) -> Bounds<usize> {
-        Bounds { offset: 0, extent: self.indices.num_indices() }
+        Bounds {
+            offset: 0,
+            extent: self.indices.num_indices(),
+        }
     }
 
     #[inline(always)]
@@ -230,7 +239,7 @@ unsafe impl IndexList for Range<usize> {
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
         Some(Bounds {
             offset: self.start,
-            extent: self.num_indices()
+            extent: self.num_indices(),
         })
     }
 }

@@ -104,7 +104,7 @@ macro_rules! impl_single_dim_index {
             fn bounds_for_index(index: Self) -> Bounds<Self> {
                 Bounds {
                     offset: index,
-                    extent: 1
+                    extent: 1,
                 }
             }
         }

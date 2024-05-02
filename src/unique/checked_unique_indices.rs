@@ -1,9 +1,9 @@
 use crate::unique::unique_indices::IndexList;
 use crate::unique::UniqueIndexList;
 use crate::RecordIndex;
+use paradis_core::Bounds;
 use std::collections::HashSet;
 use std::hash::Hash;
-use paradis_core::Bounds;
 
 /// A list of indices that are checked to be unique.
 pub struct CheckedIndexList<Idx> {
@@ -25,7 +25,7 @@ impl<Idx: RecordIndex> CheckedIndexList<Idx> {
         if indices.is_empty() {
             return Ok(Self {
                 indices,
-                bounds: Idx::empty_bounds()
+                bounds: Idx::empty_bounds(),
             });
         }
 
@@ -40,10 +40,7 @@ impl<Idx: RecordIndex> CheckedIndexList<Idx> {
             }
         }
 
-        Ok(Self {
-            indices,
-            bounds,
-        })
+        Ok(Self { indices, bounds })
     }
 }
 

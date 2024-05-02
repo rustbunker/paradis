@@ -1,6 +1,6 @@
-use paradis_core::Bounds;
 use crate::unique::unique_indices::IndexList;
 use crate::unique::UniqueIndexList;
+use paradis_core::Bounds;
 
 /// The result of zipping two *equal-length* index sets.
 ///
@@ -49,9 +49,7 @@ where
     }
 
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
-        self.0.bounds()
-            .zip(self.1.bounds())
-            .map(|(a, b)| a.zip(b))
+        self.0.bounds().zip(self.1.bounds()).map(|(a, b)| a.zip(b))
     }
 }
 

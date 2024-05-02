@@ -50,8 +50,7 @@ fn main() {
             .index_flatten();
 
         // Restrict the parallel access to our selected indices
-        let access = narrow_access_to_indices(access, &indices)
-            .expect("Indices must be in bounds");
+        let access = narrow_access_to_indices(access, &indices).expect("Indices must be in bounds");
         create_par_iter(access).for_each(|a_ijkl| *a_ijkl *= 2);
 
         assert_eq!(
@@ -112,7 +111,7 @@ unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAc
     fn bounds(&self) -> Bounds<(usize, usize, usize, usize)> {
         Bounds {
             offset: (0, 0, 0, 0),
-            extent: (self.dims[0], self.dims[1], self.dims[2], self.dims[3])
+            extent: (self.dims[0], self.dims[1], self.dims[2], self.dims[3]),
         }
     }
 

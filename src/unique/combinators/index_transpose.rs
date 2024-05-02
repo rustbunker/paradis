@@ -1,5 +1,5 @@
-use paradis_core::Bounds;
 use crate::unique::{IndexList, UniqueIndexList};
+use paradis_core::Bounds;
 
 /// An index combinator that transposed indices.
 ///
@@ -27,12 +27,10 @@ where
     }
 
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
-        self.0
-            .bounds()
-            .map(|bounds| Bounds {
-                offset: bounds.offset.transpose(),
-                extent: bounds.extent.transpose(),
-            })
+        self.0.bounds().map(|bounds| Bounds {
+            offset: bounds.offset.transpose(),
+            extent: bounds.extent.transpose(),
+        })
     }
 }
 
