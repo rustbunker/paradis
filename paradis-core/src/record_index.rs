@@ -13,6 +13,12 @@ pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {
 
     fn contains_bounds(container: &Bounds<Self>, bounds: &Bounds<Self>) -> bool;
     fn in_bounds(&self, bounds: &Bounds<Self>) -> bool;
+
+    fn enclose_index(bounds: &mut Bounds<Self>, index: Self);
+
+    fn empty_bounds() -> Bounds<Self>;
+
+    fn bounds_for_index(index: Self) -> Bounds<Self>;
 }
 
 /// Bounds associated with an index type.
@@ -30,10 +36,41 @@ pub struct Bounds<I> {
     pub extent: I,
 }
 
+impl<I> Bounds<I> {
+    pub fn zip<I2>(self, other: Bounds<I2>) -> Bounds<(I, I2)> {
+        Bounds {
+            offset: (self.offset, other.offset),
+            extent: (self.extent, other.extent),
+        }
+    }
+}
+
+impl<I: RecordIndex> Bounds<I> {
+    pub fn contains_bounds(&self, other: &Bounds<I>) -> bool {
+        I::contains_bounds(self, other)
+    }
+
+    pub fn contains_index(&self, index: I) -> bool {
+        index.in_bounds(self)
+    }
+
+    pub fn enclose_index(&mut self, index: I) {
+        I::enclose_index(self, index)
+    }
+
+    pub fn new_empty() -> Self {
+        I::empty_bounds()
+    }
+
+    pub fn bounds_for_index(index: I) -> Self {
+        I::bounds_for_index(index)
+    }
+}
+
 macro_rules! impl_single_dim_index {
     ($ty:ty) => {
         unsafe impl RecordIndex for $ty {
-            #[inline(always)]
+            #[inline]
             fn contains_bounds(container: &Bounds<Self>, bounds: &Bounds<Self>) -> bool {
                 let left_contained = container.offset <= bounds.offset;
                 let right_contained =
@@ -41,11 +78,34 @@ macro_rules! impl_single_dim_index {
                 left_contained && right_contained
             }
 
-            #[inline(always)]
+            #[inline]
             fn in_bounds(&self, bounds: &Bounds<Self>) -> bool {
                 let Bounds { offset, extent } = *bounds;
                 let i = *self;
                 offset <= i && i < (offset + extent)
+            }
+
+            #[inline]
+            fn enclose_index(bounds: &mut Bounds<Self>, index: Self) {
+                let new_offset = Self::min(bounds.offset, index);
+                bounds.offset = new_offset;
+                bounds.extent = Self::max(bounds.extent, index - new_offset + 1)
+            }
+
+            #[inline]
+            fn empty_bounds() -> Bounds<Self> {
+                Bounds {
+                    offset: 0,
+                    extent: 0,
+                }
+            }
+
+            #[inline]
+            fn bounds_for_index(index: Self) -> Bounds<Self> {
+                Bounds {
+                    offset: index,
+                    extent: 1
+                }
             }
         }
     };
@@ -63,10 +123,13 @@ impl_single_dim_index!(u32);
 #[cfg(any(target_pointer_width = "64", target_pointer_width = "128",))]
 impl_single_dim_index!(u64);
 
+// TODO: I think we can simplify this by removing the head/tail distinction
+// most places and instead create a helper macro for the few places where this is necessary
+// (mainly concatenating by && )
 macro_rules! impl_tuple_index {
     (($ty_head:tt, $($ty_tail:tt),*), ($idx_head:tt, $($idx_tail:tt),*)) => {
         unsafe impl<$ty_head: RecordIndex, $($ty_tail: RecordIndex),*> RecordIndex for ($ty_head, $($ty_tail),*) {
-            #[inline(always)]
+            #[inline]
             fn contains_bounds(container: &Bounds<Self>, bounds: &Bounds<Self>) -> bool {
                 let container_bounds = (
                     Bounds { offset: container.offset.$idx_head, extent: container.extent.$idx_head },
@@ -83,7 +146,7 @@ macro_rules! impl_tuple_index {
                     $(&& $ty_tail::contains_bounds(&container_bounds.$idx_tail, &bounds.$idx_tail))*
             }
 
-            #[inline(always)]
+            #[inline]
             fn in_bounds(&self, bounds: &Bounds<Self>) -> bool {
                 let bounds = (
                     Bounds { offset: bounds.offset.$idx_head, extent: bounds.extent.$idx_head },
@@ -91,6 +154,67 @@ macro_rules! impl_tuple_index {
                 );
                 self.$idx_head.in_bounds(&bounds.$idx_head)
                     $(&& self.$idx_tail.in_bounds(&bounds.$idx_tail))*
+            }
+
+            #[inline]
+            fn enclose_index(bounds: &mut Bounds<Self>, index: Self) {
+                // First create 1D bounds
+                let mut bounds_1d = (
+                    Bounds { offset: bounds.offset.$idx_head, extent: bounds.extent.$idx_head },
+                    $(Bounds { offset: bounds.offset.$idx_tail, extent: bounds.extent.$idx_tail }),*
+                );
+                // Update along each axis
+                bounds_1d.$idx_head.enclose_index(index.$idx_head);
+                $(bounds_1d.$idx_tail.enclose_index(index.$idx_tail);)*
+
+                // Store the results back in tuple bounds
+                bounds.offset.$idx_head = bounds_1d.$idx_head.offset;
+                $(bounds.offset.$idx_tail = bounds_1d.$idx_tail.offset;)*
+                bounds.extent.$idx_head = bounds_1d.$idx_head.extent;
+                $(bounds.extent.$idx_tail = bounds_1d.$idx_tail.extent;)*
+            }
+
+            #[inline]
+            fn empty_bounds() -> Bounds<Self> {
+                // First create 1D bounds
+                let bounds_1d = (
+                    $ty_head::empty_bounds(),
+                    $($ty_tail::empty_bounds()),*
+                );
+
+                // Then merge
+                Bounds {
+                    offset: (
+                        bounds_1d.$idx_head.offset,
+                        $(bounds_1d.$idx_tail.offset),*
+                    ),
+                    extent: (
+                        bounds_1d.$idx_head.offset,
+                        $(bounds_1d.$idx_tail.offset),*
+                    )
+                }
+
+            }
+
+            #[inline]
+            fn bounds_for_index(index: Self) -> Bounds<Self> {
+                // // First create 1D bounds
+                let bounds_1d = (
+                    $ty_head::bounds_for_index(index.$idx_head),
+                    $($ty_tail::bounds_for_index(index.$idx_tail)),*
+                );
+
+                // Then merge
+                Bounds {
+                    offset: (
+                        bounds_1d.$idx_head.offset,
+                        $(bounds_1d.$idx_tail.offset),*
+                    ),
+                    extent: (
+                        bounds_1d.$idx_head.offset,
+                        $(bounds_1d.$idx_tail.offset),*
+                    )
+                }
             }
         }
     }

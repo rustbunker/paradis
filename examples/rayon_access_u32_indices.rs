@@ -14,7 +14,8 @@ fn example_with_checked_indices_u32() {
         .expect("All indices unique")
         .index_cast();
 
-    let access = narrow_access_to_indices(data.as_mut_slice(), &checked_indices);
+    let access = narrow_access_to_indices(data.as_mut_slice(), &checked_indices)
+        .expect("indices must be unique");
     create_par_iter(access).for_each(|x| *x *= 2.0);
 
     for (idx, elem) in data.into_iter().enumerate() {

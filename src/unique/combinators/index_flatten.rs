@@ -1,3 +1,4 @@
+use paradis_core::Bounds;
 use crate::internal::Sealed;
 use crate::unique::unique_indices::IndexList;
 use crate::unique::UniqueIndexList;
@@ -14,6 +15,7 @@ where
     <SourceIndices::Index as Flatten>::Flattened: Copy,
 {
     type Index = <SourceIndices::Index as Flatten>::Flattened;
+    const ALWAYS_BOUNDED: bool = SourceIndices::ALWAYS_BOUNDED;
 
     unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
         self.0.get_unchecked(loc).flatten()
@@ -21,6 +23,14 @@ where
 
     fn num_indices(&self) -> usize {
         self.0.num_indices()
+    }
+
+    fn bounds(&self) -> Option<Bounds<Self::Index>> {
+        self.0.bounds()
+            .map(|bounds| Bounds {
+                offset: bounds.offset.flatten(),
+                extent: bounds.extent.flatten()
+            })
     }
 }
 

@@ -1,3 +1,4 @@
+use paradis_core::Bounds;
 use crate::unique::{IndexList, UniqueIndexList};
 
 /// An index combinator that transposed indices.
@@ -14,6 +15,8 @@ where
 {
     type Index = <I::Index as Transpose>::Transposed;
 
+    const ALWAYS_BOUNDED: bool = I::ALWAYS_BOUNDED;
+
     unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
         let source_idx = self.0.get_unchecked(loc);
         source_idx.transpose()
@@ -21,6 +24,15 @@ where
 
     fn num_indices(&self) -> usize {
         self.0.num_indices()
+    }
+
+    fn bounds(&self) -> Option<Bounds<Self::Index>> {
+        self.0
+            .bounds()
+            .map(|bounds| Bounds {
+                offset: bounds.offset.transpose(),
+                extent: bounds.extent.transpose(),
+            })
     }
 }
 

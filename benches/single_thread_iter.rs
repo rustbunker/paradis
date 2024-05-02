@@ -46,7 +46,7 @@ fn slice_redundantly_indexed_access(bencher: Bencher, n: usize) {
     bencher.bench_local(|| {
         let indices = 0..n;
         let access = black_box(&mut data).into_par_access();
-        let access = narrow_access_to_indices(access, &indices);
+        let access = narrow_access_to_indices(access, &indices).unwrap();
         for elem in create_iter(access) {
             *elem *= factor;
         }

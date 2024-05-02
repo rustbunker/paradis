@@ -43,7 +43,10 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.start_idx < self.end_idx {
-            let item = unsafe { self.access.get_unsync(self.start_idx) };
+            // SAFETY: This is sound because our start and end indices are derived
+            // from the size returned by the access object, therefore we can
+            // infer that we're in bounds. We also never give out the same record twice
+            let item = unsafe { self.access.get_unsync_unchecked(self.start_idx) };
             self.start_idx += 1;
             Some(item)
         } else {
@@ -62,7 +65,10 @@ where
         // TODO: Need to test this impl
         if self.end_idx > self.start_idx {
             self.end_idx -= 1;
-            let item = unsafe { self.access.get_unsync(self.end_idx) };
+            // SAFETY: This is sound because our start and end indices are derived
+            // from the size returned by the access object, therefore we can
+            // infer that we're in bounds. We also never give out the same record twice
+            let item = unsafe { self.access.get_unsync_unchecked(self.end_idx) };
             Some(item)
         } else {
             None
@@ -137,10 +143,11 @@ where
 
     fn with_producer<CB: ProducerCallback<Self::Item>>(self, callback: CB) -> CB::Output {
         let access = self.access;
+
         callback.callback(AccessProducer {
-            start_idx: 0,
-            end_idx: access.len(),
-            access,
+                start_idx: 0,
+                end_idx: access.len(),
+                access,
         })
     }
 }

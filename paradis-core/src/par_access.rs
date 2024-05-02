@@ -1,3 +1,5 @@
+use crate::{Bounds, RecordIndex};
+
 /// Facilitates unsynchronized access to records stored in the collection.
 ///
 /// The trait provides *unsynchronized* access to (possibly mutable) *records*, defined by the
@@ -24,10 +26,22 @@ pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
 
     unsafe fn clone_access(&self) -> Self;
 
-    // fn bounds(&self) -> Bounds<Index>;
+    /// The bounds of this data structure.
+    ///
+    /// # Safety
+    ///
+    /// The bounds for a collection must never change while an access object still lives.
+    fn bounds(&self) -> Bounds<Index>;
 
     /// Determine if the provided index is in bounds.
-    fn in_bounds(&self, index: Index) -> bool;
+    ///
+    /// TODO: Remove this method in favor of using self.bounds().contains_index(idx)
+    fn in_bounds(&self, index: Index) -> bool
+    where
+        Index: RecordIndex,
+    {
+        self.bounds().contains_index(index)
+    }
 
     /// Unsynchronized mutable lookup of record.
     ///
@@ -39,7 +53,10 @@ pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
     ///
     /// Implementors must ensure that the method panics if the index is out of bounds.
     #[inline(always)]
-    unsafe fn get_unsync(&self, index: Index) -> Self::Record {
+    unsafe fn get_unsync(&self, index: Index) -> Self::Record
+    where
+        Index: RecordIndex,
+    {
         assert!(self.in_bounds(index), "index out of bounds");
         self.get_unsync_unchecked(index)
     }
@@ -73,5 +90,10 @@ pub unsafe trait LinearParAccess: ParAccess<usize> {
     /// An implementor must ensure that this length never changes. In other words,
     /// once an access is obtained, the size of the collection must never not change
     /// while an access is active.
-    fn len(&self) -> usize;
+    ///
+    /// It must also be equivalent to the result returned by the extent of the
+    /// [`Bounds`] of the access.
+    fn len(&self) -> usize {
+        self.bounds().extent
+    }
 }

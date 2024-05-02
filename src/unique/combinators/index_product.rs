@@ -1,3 +1,4 @@
+use paradis_core::Bounds;
 use crate::unique::unique_indices::IndexList;
 use crate::unique::UniqueIndexList;
 
@@ -16,6 +17,7 @@ where
     B: IndexList,
 {
     type Index = (A::Index, B::Index);
+    const ALWAYS_BOUNDED: bool = A::ALWAYS_BOUNDED && B::ALWAYS_BOUNDED;
 
     unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
         let m = self.1.num_indices();
@@ -26,6 +28,13 @@ where
 
     fn num_indices(&self) -> usize {
         self.0.num_indices() * self.1.num_indices()
+    }
+
+    fn bounds(&self) -> Option<Bounds<Self::Index>> {
+        self.0
+            .bounds()
+            .zip(self.1.bounds())
+            .map(|(a, b)| a.zip(b))
     }
 }
 

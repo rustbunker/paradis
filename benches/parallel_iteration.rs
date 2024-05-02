@@ -73,7 +73,8 @@ fn slice_redundantly_indexed_access(bencher: Bencher, (n, num_threads): (usize, 
     run_rayon_bench!(bencher, num_threads = num_threads, || {
         let access = black_box(data.as_mut_slice()).into_par_access();
         let indices = 0..n;
-        let access = narrow_access_to_indices(access, &indices);
+        let access = narrow_access_to_indices(access, &indices)
+            .expect("Indices must be in bounds");
         create_par_iter(access).for_each(|x| *x *= factor);
     });
 }
@@ -90,7 +91,7 @@ fn slice_subset_indexed_access(bencher: Bencher, (n, num_threads): (usize, usize
 
     run_rayon_bench!(bencher, num_threads = num_threads, || {
         let access = black_box(data.as_mut_slice()).into_par_access();
-        let access = narrow_access_to_indices(access, &indices);
+        let access = narrow_access_to_indices(access, &indices).unwrap();
         create_par_iter(access).for_each(|x| *x *= factor);
     });
 }

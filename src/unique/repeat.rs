@@ -1,3 +1,4 @@
+use paradis_core::Bounds;
 use crate::unique::IndexList;
 use crate::RecordIndex;
 
@@ -26,11 +27,17 @@ impl<I> Repeat<I> {
 unsafe impl<I: RecordIndex> IndexList for Repeat<I> {
     type Index = I;
 
+    const ALWAYS_BOUNDED: bool = true;
+
     unsafe fn get_unchecked(&self, _: usize) -> Self::Index {
         self.value
     }
 
     fn num_indices(&self) -> usize {
         self.times
+    }
+
+    fn bounds(&self) -> Option<Bounds<Self::Index>> {
+        Some(Bounds::bounds_for_index(self.value))
     }
 }

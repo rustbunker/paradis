@@ -1,5 +1,5 @@
 //! Core primitives for slices.
-use crate::{IntoParAccess, LinearParAccess, ParAccess};
+use crate::{Bounds, IntoParAccess, LinearParAccess, ParAccess};
 use std::marker::PhantomData;
 
 #[derive(Debug)]
@@ -32,6 +32,13 @@ unsafe impl<'a, T: Sync + Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
     #[inline(always)]
     fn in_bounds(&self, index: usize) -> bool {
         index < self.len
+    }
+
+    fn bounds(&self) -> Bounds<usize> {
+        Bounds {
+            offset: 0,
+            extent: self.len,
+        }
     }
 }
 

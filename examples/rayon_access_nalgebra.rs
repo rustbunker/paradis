@@ -2,7 +2,7 @@ use nalgebra::{dmatrix, DMatrix, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
 use paradis::unique::{narrow_access_to_indices, CheckedIndexList, IndexList, Repeat};
 use paradis::ParAccess;
-use paradis_core::LinearParAccess;
+use paradis_core::{Bounds, LinearParAccess};
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
 
@@ -55,6 +55,10 @@ unsafe impl<'a, T: Scalar> ParAccess<usize> for DMatrixColParAccessMut<'a, T> {
     fn in_bounds(&self, index: usize) -> bool {
         index < self.cols
     }
+
+    fn bounds(&self) -> Bounds<usize> {
+        Bounds { offset: 0, extent: self.cols }
+    }
 }
 
 unsafe impl<'a, T: Scalar> LinearParAccess for DMatrixColParAccessMut<'a, T> {
@@ -97,6 +101,10 @@ unsafe impl<'a, T: Scalar> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a,
         }
     }
 
+    fn bounds(&self) -> Bounds<(usize, usize)> {
+        Bounds { offset: (0, 0), extent: (self.rows, self.cols) }
+    }
+
     fn in_bounds(&self, (i, j): (usize, usize)) -> bool {
         i < self.rows && j < self.cols
     }
@@ -128,7 +136,8 @@ fn example_par_matrix_entries_iteration() {
     let checked_indices =
         CheckedIndexList::from_hashable_indices(indices.clone()).expect("All indices unique");
 
-    let access = narrow_access_to_indices(matrix_access, &checked_indices);
+    let access = narrow_access_to_indices(matrix_access, &checked_indices)
+        .expect("Indices must be in bounds");
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2.0);
 
     for (i, j) in (0..m).zip(0..n) {
@@ -150,7 +159,8 @@ fn example_par_matrix_submatrix_iteration() {
 
     // The 2x2 submatrix starting at (1, 2) can be described by a Cartesian product of index ranges
     let indices = (1..=2).index_product(2..=3);
-    let access = narrow_access_to_indices(matrix_access, &indices);
+    let access = narrow_access_to_indices(matrix_access, &indices)
+        .expect("Indices must be in bounds");
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
 
     assert_eq!(
@@ -170,7 +180,8 @@ fn example_par_matrix_superdiagonal_iteration() {
 
     // The first superdiagonal corresponds to zipping two index sets
     let superdiagonal_indices = (0..3).index_zip(1..4);
-    let access = narrow_access_to_indices(matrix_access, &superdiagonal_indices);
+    let access = narrow_access_to_indices(matrix_access, &superdiagonal_indices)
+        .expect("Indices must be in bounds");
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
 
     assert_eq!(
@@ -207,7 +218,8 @@ fn example_par_select_single_col() {
                               10, 11, 12, 13, 14 ];
     let indices = (0..3).index_zip(Repeat::value(1).times(3));
     let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
-    let access = narrow_access_to_indices(access, &indices);
+    let access = narrow_access_to_indices(access, &indices)
+        .expect("Indices must be in bounds");
 
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
 
@@ -238,7 +250,8 @@ fn example_par_select_single_row() {
         .index_transpose();
 
     let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
-    let access = narrow_access_to_indices(access, &indices);
+    let access = narrow_access_to_indices(access, &indices)
+        .expect("Indices must be in bounds");
 
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2);
 

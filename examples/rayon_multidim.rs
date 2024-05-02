@@ -1,6 +1,6 @@
 use paradis::rayon::create_par_iter;
 use paradis::unique::{narrow_access_to_indices, IndexList};
-use paradis_core::ParAccess;
+use paradis_core::{Bounds, ParAccess};
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
 
@@ -22,7 +22,7 @@ fn main() {
             .index_product(0..2)
             // Flatten nested tuple to (usize, usize, usize, usize)
             .index_flatten();
-        let access = narrow_access_to_indices(access, &indices);
+        let access = narrow_access_to_indices(access, &indices).unwrap();
         create_par_iter(access).for_each(|a_ijkl| *a_ijkl *= 2);
 
         assert_eq!(
@@ -50,7 +50,8 @@ fn main() {
             .index_flatten();
 
         // Restrict the parallel access to our selected indices
-        let access = narrow_access_to_indices(access, &indices);
+        let access = narrow_access_to_indices(access, &indices)
+            .expect("Indices must be in bounds");
         create_par_iter(access).for_each(|a_ijkl| *a_ijkl *= 2);
 
         assert_eq!(
@@ -105,6 +106,13 @@ unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAc
             ptr: self.ptr,
             dims: self.dims,
             marker: self.marker.clone(),
+        }
+    }
+
+    fn bounds(&self) -> Bounds<(usize, usize, usize, usize)> {
+        Bounds {
+            offset: (0, 0, 0, 0),
+            extent: (self.dims[0], self.dims[1], self.dims[2], self.dims[3])
         }
     }
 
