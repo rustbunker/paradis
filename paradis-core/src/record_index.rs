@@ -123,104 +123,88 @@ impl_single_dim_index!(u32);
 #[cfg(any(target_pointer_width = "64", target_pointer_width = "128",))]
 impl_single_dim_index!(u64);
 
-// TODO: I think we can simplify this by removing the head/tail distinction
-// most places and instead create a helper macro for the few places where this is necessary
-// (mainly concatenating by && )
+/// Joins the provided list of expressions with the given separator
+macro_rules! join_expressions {
+    ($separator:tt; $token_head:expr, $($token_tail:expr),*) => {
+        $token_head $($separator $token_tail)*
+    }
+}
+
+/// Implement the RecordIndex trait for tuples
 macro_rules! impl_tuple_index {
-    (($ty_head:tt, $($ty_tail:tt),*), ($idx_head:tt, $($idx_tail:tt),*)) => {
-        unsafe impl<$ty_head: RecordIndex, $($ty_tail: RecordIndex),*> RecordIndex for ($ty_head, $($ty_tail),*) {
+    (($($idx_type:tt),*), ($($idx:tt),*)) => {
+        unsafe impl<$($idx_type: RecordIndex),*> RecordIndex for ($($idx_type),*) {
             #[inline]
             fn contains_bounds(container: &Bounds<Self>, bounds: &Bounds<Self>) -> bool {
+                // First construct 1D bounds
                 let container_bounds = (
-                    Bounds { offset: container.offset.$idx_head, extent: container.extent.$idx_head },
-                    $(Bounds { offset: container.offset.$idx_tail, extent: container.extent.$idx_tail }),*
+                    $(Bounds { offset: container.offset.$idx, extent: container.extent.$idx }),*
                 );
                 let bounds = (
-                    Bounds { offset: bounds.offset.$idx_head, extent: bounds.extent.$idx_head },
-                    $(Bounds { offset: bounds.offset.$idx_tail, extent: bounds.extent.$idx_tail }),*
+                    $(Bounds { offset: bounds.offset.$idx, extent: bounds.extent.$idx }),*
                 );
                 // For tuples, we return true if for each one-dimensional tuple element pair,
-                // the bound is contained in the container
-                // (i.e., separately for each axis)
-                $ty_head::contains_bounds(&container_bounds.$idx_head, &bounds.$idx_head)
-                    $(&& $ty_tail::contains_bounds(&container_bounds.$idx_tail, &bounds.$idx_tail))*
+                // the bound is contained in the container (i.e., separately for each axis)
+                join_expressions!(
+                    &&;
+                    $($idx_type::contains_bounds(&container_bounds.$idx, &bounds.$idx)),*
+                )
             }
 
             #[inline]
             fn in_bounds(&self, bounds: &Bounds<Self>) -> bool {
+                // First construct 1D bounds
                 let bounds = (
-                    Bounds { offset: bounds.offset.$idx_head, extent: bounds.extent.$idx_head },
-                    $(Bounds { offset: bounds.offset.$idx_tail, extent: bounds.extent.$idx_tail }),*
+                    $(Bounds { offset: bounds.offset.$idx, extent: bounds.extent.$idx }),*
                 );
-                self.$idx_head.in_bounds(&bounds.$idx_head)
-                    $(&& self.$idx_tail.in_bounds(&bounds.$idx_tail))*
+                // For tuples, we return true if the index is in bounds along every dimension
+                join_expressions!(
+                    &&;
+                    $(self.$idx.in_bounds(&bounds.$idx)),*
+                )
             }
 
             #[inline]
             fn enclose_index(bounds: &mut Bounds<Self>, index: Self) {
                 // First create 1D bounds
                 let mut bounds_1d = (
-                    Bounds { offset: bounds.offset.$idx_head, extent: bounds.extent.$idx_head },
-                    $(Bounds { offset: bounds.offset.$idx_tail, extent: bounds.extent.$idx_tail }),*
+                    $(Bounds { offset: bounds.offset.$idx, extent: bounds.extent.$idx }),*
                 );
                 // Update along each axis
-                bounds_1d.$idx_head.enclose_index(index.$idx_head);
-                $(bounds_1d.$idx_tail.enclose_index(index.$idx_tail);)*
+                $(bounds_1d.$idx.enclose_index(index.$idx);)*
 
                 // Store the results back in tuple bounds
-                bounds.offset.$idx_head = bounds_1d.$idx_head.offset;
-                $(bounds.offset.$idx_tail = bounds_1d.$idx_tail.offset;)*
-                bounds.extent.$idx_head = bounds_1d.$idx_head.extent;
-                $(bounds.extent.$idx_tail = bounds_1d.$idx_tail.extent;)*
+                $(bounds.offset.$idx = bounds_1d.$idx.offset;)*
+                $(bounds.extent.$idx = bounds_1d.$idx.extent;)*
             }
 
             #[inline]
             fn empty_bounds() -> Bounds<Self> {
                 // First create 1D bounds
-                let bounds_1d = (
-                    $ty_head::empty_bounds(),
-                    $($ty_tail::empty_bounds()),*
-                );
+                let bounds_1d = ($($idx_type::empty_bounds()),*);
 
                 // Then merge
                 Bounds {
-                    offset: (
-                        bounds_1d.$idx_head.offset,
-                        $(bounds_1d.$idx_tail.offset),*
-                    ),
-                    extent: (
-                        bounds_1d.$idx_head.offset,
-                        $(bounds_1d.$idx_tail.offset),*
-                    )
+                    offset: ($(bounds_1d.$idx.offset),*),
+                    extent: ($(bounds_1d.$idx.offset),*)
                 }
-
             }
 
             #[inline]
             fn bounds_for_index(index: Self) -> Bounds<Self> {
                 // // First create 1D bounds
-                let bounds_1d = (
-                    $ty_head::bounds_for_index(index.$idx_head),
-                    $($ty_tail::bounds_for_index(index.$idx_tail)),*
-                );
+                let bounds_1d = ($($idx_type::bounds_for_index(index.$idx)),*);
 
                 // Then merge
                 Bounds {
-                    offset: (
-                        bounds_1d.$idx_head.offset,
-                        $(bounds_1d.$idx_tail.offset),*
-                    ),
-                    extent: (
-                        bounds_1d.$idx_head.offset,
-                        $(bounds_1d.$idx_tail.offset),*
-                    )
+                    offset: ($(bounds_1d.$idx.offset),*),
+                    extent: ($(bounds_1d.$idx.offset),*)
                 }
             }
         }
-    }
+    };
 }
 
-impl_tuple_index!((I0,), (0,));
 impl_tuple_index!((I0, I1), (0, 1));
 impl_tuple_index!((I0, I1, I2), (0, 1, 2));
 impl_tuple_index!((I0, I1, I2, I3), (0, 1, 2, 3));
