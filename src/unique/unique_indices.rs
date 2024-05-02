@@ -1,4 +1,6 @@
-use crate::unique::combinators::{IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip};
+use crate::unique::combinators::{
+    IndexAZip, IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip,
+};
 use crate::unique::OutOfBounds;
 use crate::IndexFrom;
 use paradis_core::{Bounds, LinearParAccess, ParAccess, RecordIndex};
@@ -46,20 +48,45 @@ pub unsafe trait IndexList: Sync + Send {
         IndexProduct(self, other)
     }
 
-    /// Zips this index set with another.
+    /// Zips this index list with another.
+    ///
+    /// Specifically, if `a` and `b` are lists, then the elements of `a.index_zip(b)`
+    /// are `(a[0], b[0]), (a[1], b[1]), ...`.
+    ///
+    /// # Uniqueness
+    ///
+    /// The resulting indices are unique if *either* of the two index lists have unique indices.
+    /// However, this cannot be expressed in the type system. Therefore, the resulting indices
+    /// are unique only if the first index list has unique indices.
+    /// Use [`index_azip`](Self::index_azip) if only the second list has unique indices.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the other index set does not have the same number of elements as this index set.
+    /// This behavior is distinct from [Iterator::zip], which instead ignores elements in the longer
+    /// collection.
+    fn index_zip<I: IndexList>(self, other: I) -> IndexZip<Self, I>
+    where
+        Self: Sized,
+    {
+        IndexZip::new(self, other)
+    }
+
+    /// Zips this index list with another, but uniqueness is determined by the second list.
+    ///
+    /// This is identical to [`index_zip`](Self::index_zip), except that indices are considered
+    /// unique if the *second* list is unique.
     ///
     /// # Panics
     ///
     /// Panics if the other index set does not have the same number of elements as this index set.
     /// This behavior is distinct from Iterator::zip, which instead ignores elements in the longer
     /// collection.
-    ///
-    /// TODO: Better docs
-    fn index_zip<I: IndexList>(self, other: I) -> IndexZip<Self, I>
+    fn index_azip<I: IndexList>(self, other: I) -> IndexAZip<Self, I>
     where
         Self: Sized,
     {
-        IndexZip::new(self, other)
+        IndexAZip::new(self, other)
     }
 
     /// Flattens nested tuple indices.

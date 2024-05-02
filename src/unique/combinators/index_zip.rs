@@ -64,3 +64,61 @@ where
     B: IndexList,
 {
 }
+
+/// [`IndexZip`] where uniqueness is determined by the *second* argument.
+///
+/// See [IndexList::index_azip](crate::unique::IndexList::index_azip) for more
+/// information.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IndexAZip<A, B>(A, B);
+
+impl<A, B> IndexAZip<A, B>
+where
+    A: IndexList,
+    B: IndexList,
+{
+    pub fn new(a: A, b: B) -> Self {
+        assert_eq!(
+            a.num_indices(),
+            b.num_indices(),
+            "IndexAZip requires the number of indices to be equal in the zipped index sets"
+        );
+        Self(a, b)
+    }
+}
+
+// TODO: Test this impl
+unsafe impl<A, B> IndexList for IndexAZip<A, B>
+where
+    A: IndexList,
+    B: IndexList,
+{
+    type Index = (A::Index, B::Index);
+
+    const ALWAYS_BOUNDED: bool = A::ALWAYS_BOUNDED && B::ALWAYS_BOUNDED;
+
+    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
+        (self.0.get_unchecked(loc), self.1.get_unchecked(loc))
+    }
+
+    fn num_indices(&self) -> usize {
+        debug_assert_eq!(self.0.num_indices(), self.1.num_indices());
+        self.0.num_indices()
+    }
+
+    fn bounds(&self) -> Option<Bounds<Self::Index>> {
+        self.0.bounds().zip(self.1.bounds()).map(|(a, b)| a.zip(b))
+    }
+}
+
+unsafe impl<A, B> UniqueIndexList for IndexAZip<A, B>
+where
+    // TODO: IndexZip would satisfy UniqueIndexList if *either* A or B
+    // has unique indices. However, we are unable to
+    // express this in Rust's type system as this would require specialization
+    // or at least lattice impls
+    // We still need a way for users to work around this though
+    A: IndexList,
+    B: UniqueIndexList,
+{
+}

@@ -242,17 +242,7 @@ fn example_par_select_single_row() {
                               10, 11, 12, 13, 14 ];
 
     // Select all the indices in row 1
-    // Ideally, we'd be able to write the commented code ...
-    // let indices = Repeat::value(1)
-    //     .times(5)
-    //     .index_zip(0 .. 5);
-    // but unfortunately this is not possible due to limitations of Rust's type system
-    // so instead we specify the indices in the transposed order and then transpose them again
-    // See the docs for index zipping for more details
-    // TODO: Find a better workaround for this
-    let indices = (0..5)
-        .index_zip(Repeat::value(1).times(5))
-        .index_transpose();
+    let indices = Repeat::value(1).times(5).index_azip(0..5);
 
     let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
     let access = narrow_access_to_indices(access, &indices).expect("Indices must be in bounds");
