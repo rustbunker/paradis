@@ -1,10 +1,12 @@
+use crate::unique::checked_unique::NonUniqueIndex;
 use crate::unique::combinators::{
     IndexAZip, IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip,
 };
-use crate::unique::OutOfBounds;
+use crate::unique::{CheckedUnique, OutOfBounds};
 use crate::IndexFrom;
 use paradis_core::{Bounds, LinearParAccess, ParAccess, RecordIndex};
 use std::any::type_name;
+use std::hash::Hash;
 use std::ops::{Range, RangeInclusive};
 
 /// A finite list of indices.
@@ -107,6 +109,21 @@ pub unsafe trait IndexList: Sync + Send {
         Self: Sized,
     {
         IndexTranspose(self)
+    }
+
+    /// Turns an index list into a list of unique indices, if possible.
+    ///
+    /// Checks that all indices are unique, and also determines their bounds.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the indices are not unique.
+    fn check_unique(self) -> Result<CheckedUnique<Self>, NonUniqueIndex>
+    where
+        Self: Sized,
+        Self::Index: RecordIndex + Hash,
+    {
+        CheckedUnique::from_hashable_indices(self)
     }
 }
 

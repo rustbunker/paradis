@@ -1,6 +1,6 @@
 use nalgebra::{dmatrix, DMatrix, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::create_par_iter;
-use paradis::unique::{narrow_access_to_indices, CheckedUnique, IndexList, Repeat};
+use paradis::unique::{narrow_access_to_indices, IndexList, Repeat};
 use paradis::ParAccess;
 use paradis_core::{Bounds, LinearParAccess};
 use rayon::iter::ParallelIterator;
@@ -138,17 +138,19 @@ fn example_par_matrix_entries_iteration() {
 
     let matrix_access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
 
-    let indices = vec![(0, 0), (1, 0), (99, 100)];
-    let checked_indices =
-        CheckedUnique::from_hashable_indices(indices.clone()).expect("All indices unique");
+    let indices = vec![(0, 0), (1, 0), (99, 100)]
+        // Since the list of indices are not statically guaranteed to be unique,
+        // we need to check them for uniqueness at runtime
+        .check_unique()
+        .expect("All indices unique");
 
-    let access = narrow_access_to_indices(matrix_access, &checked_indices)
-        .expect("Indices must be in bounds");
+    let access =
+        narrow_access_to_indices(matrix_access, &indices).expect("Indices must be in bounds");
     create_par_iter(access).for_each(|a_ij| *a_ij *= 2.0);
 
     for (i, j) in (0..m).zip(0..n) {
         let elem = matrix[(i, j)];
-        if indices.contains(&(i, j)) {
+        if indices.get_inner().contains(&(i, j)) {
             assert_eq!(elem, 2.0);
         } else {
             assert_eq!(elem, 1.0);

@@ -15,6 +15,16 @@ pub struct CheckedUnique<Indices: IndexList> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NonUniqueIndex;
 
+impl<Indices: IndexList> CheckedUnique<Indices> {
+    pub fn get_inner(&self) -> &Indices {
+        &self.indices
+    }
+
+    pub fn into_inner(self) -> Indices {
+        self.indices
+    }
+}
+
 impl<Indices> CheckedUnique<Indices>
 where
     Indices: IndexList,
