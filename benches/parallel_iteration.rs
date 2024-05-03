@@ -1,6 +1,6 @@
 use divan::Bencher;
 use paradis::rayon::create_par_iter;
-use paradis::unique::{narrow_access_to_indices, CheckedIndexList};
+use paradis::unique::{narrow_access_to_indices, CheckedUnique};
 use paradis_core::{IntoParAccess, ParAccess};
 use rayon::iter::{IntoParallelRefIterator, IntoParallelRefMutIterator, ParallelIterator};
 use rayon::ThreadPoolBuilder;
@@ -86,7 +86,7 @@ fn slice_subset_indexed_access(bencher: Bencher, (n, num_threads): (usize, usize
     let factor = black_box(2);
 
     let indices: Vec<_> = (0..n).step_by(2).collect();
-    let indices = CheckedIndexList::from_hashable_indices(indices).unwrap();
+    let indices = CheckedUnique::from_hashable_indices(indices).unwrap();
 
     run_rayon_bench!(bencher, num_threads = num_threads, || {
         let access = black_box(data.as_mut_slice()).into_par_access();

@@ -3,11 +3,11 @@ use paradis_core::{IntoParAccess, RecordIndex};
 
 pub mod combinators;
 
-mod checked_unique_indices;
+mod checked_unique;
 mod repeat;
 mod unique_indices;
 
-pub use checked_unique_indices::CheckedIndexList;
+pub use checked_unique::CheckedUnique;
 pub use repeat::Repeat;
 pub use unique_indices::{IndexList, IndexedAccess, UniqueIndexList};
 

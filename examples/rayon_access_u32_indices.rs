@@ -1,6 +1,6 @@
 use paradis::rayon::create_par_iter;
 use paradis::unique::IndexList;
-use paradis::unique::{narrow_access_to_indices, CheckedIndexList};
+use paradis::unique::{narrow_access_to_indices, CheckedUnique};
 use rayon::iter::ParallelIterator;
 
 fn main() {
@@ -10,7 +10,7 @@ fn main() {
 fn example_with_checked_indices_u32() {
     let mut data = vec![1.0; 10000];
     let indices: Vec<u32> = vec![900, 5, 10, 400, 1000, 100, 200];
-    let checked_indices = CheckedIndexList::from_hashable_indices(indices.clone())
+    let checked_indices = CheckedUnique::from_hashable_indices(indices.clone())
         .expect("All indices unique")
         .index_cast();
 

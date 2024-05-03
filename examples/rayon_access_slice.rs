@@ -1,5 +1,5 @@
 use paradis::rayon::create_par_iter;
-use paradis::unique::{narrow_access_to_indices, CheckedIndexList};
+use paradis::unique::{narrow_access_to_indices, CheckedUnique};
 use rayon::iter::ParallelIterator;
 
 fn main() {
@@ -22,7 +22,7 @@ fn example_with_checked_indices() {
     let mut data = vec![1.0; 10000];
     let indices = vec![900, 5, 10, 400, 1000, 100, 200];
     let checked_indices =
-        CheckedIndexList::from_hashable_indices(indices.clone()).expect("All indices unique");
+        CheckedUnique::from_hashable_indices(indices.clone()).expect("All indices unique");
 
     let access = narrow_access_to_indices(data.as_mut_slice(), &checked_indices)
         .expect("Indices are in bounds");

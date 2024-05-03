@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use std::hash::Hash;
 
 /// A list of indices that are checked to be unique.
-pub struct CheckedIndexList<Indices: IndexList> {
+pub struct CheckedUnique<Indices: IndexList> {
     indices: Indices,
     bounds: Bounds<Indices::Index>,
 }
@@ -14,7 +14,7 @@ pub struct CheckedIndexList<Indices: IndexList> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NonUniqueIndex;
 
-impl<Indices> CheckedIndexList<Indices>
+impl<Indices> CheckedUnique<Indices>
 where
     Indices: IndexList,
     Indices::Index: RecordIndex,
@@ -46,7 +46,7 @@ where
     }
 }
 
-unsafe impl<Indices> IndexList for CheckedIndexList<Indices>
+unsafe impl<Indices> IndexList for CheckedUnique<Indices>
 where
     Indices: IndexList,
     Indices::Index: RecordIndex,
@@ -68,7 +68,7 @@ where
     }
 }
 
-unsafe impl<Indices> UniqueIndexList for CheckedIndexList<Indices>
+unsafe impl<Indices> UniqueIndexList for CheckedUnique<Indices>
 where
     Indices: IndexList,
     Indices::Index: RecordIndex,
