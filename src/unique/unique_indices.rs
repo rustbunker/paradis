@@ -296,3 +296,20 @@ unsafe impl IndexList for RangeInclusive<usize> {
 }
 
 unsafe impl UniqueIndexList for RangeInclusive<usize> {}
+
+unsafe impl<I: Copy + Send + Sync> IndexList for Vec<I> {
+    type Index = I;
+    const ALWAYS_BOUNDED: bool = false;
+
+    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
+        *<[I]>::get_unchecked(self.as_slice(), loc)
+    }
+
+    fn num_indices(&self) -> usize {
+        self.len()
+    }
+
+    fn bounds(&self) -> Option<Bounds<Self::Index>> {
+        None
+    }
+}

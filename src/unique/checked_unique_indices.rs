@@ -6,34 +6,36 @@ use std::collections::HashSet;
 use std::hash::Hash;
 
 /// A list of indices that are checked to be unique.
-pub struct CheckedIndexList<Idx> {
-    // TODO: Generalize to something like IndexContainer that supports e.g. Vec<Idx>, &[Idx]
-    indices: Vec<Idx>,
-    bounds: Bounds<Idx>,
+pub struct CheckedIndexList<Indices: IndexList> {
+    indices: Indices,
+    bounds: Bounds<Indices::Index>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NonUniqueIndex;
 
-impl<Idx: RecordIndex> CheckedIndexList<Idx> {
-    pub fn from_hashable_indices(indices: Vec<Idx>) -> Result<Self, NonUniqueIndex>
+impl<Indices> CheckedIndexList<Indices>
+where
+    Indices: IndexList,
+    Indices::Index: RecordIndex,
+{
+    pub fn from_hashable_indices(indices: Indices) -> Result<Self, NonUniqueIndex>
     where
-        Idx: Hash,
+        Indices::Index: Hash,
     {
-        // TODO: Implement re-usable "checker" for re-using allocations
-
-        if indices.is_empty() {
+        let n = indices.num_indices();
+        if n == 0 {
             return Ok(Self {
                 indices,
-                bounds: Idx::empty_bounds(),
+                bounds: Indices::Index::empty_bounds(),
             });
         }
 
-        let mut set = HashSet::with_capacity(indices.len());
-        let (head, tail) = indices.split_first().unwrap();
-        let mut bounds = Bounds::bounds_for_index(*head);
-
-        for idx in tail.iter().copied() {
+        let mut bounds = Bounds::bounds_for_index(indices.get(0));
+        // TODO: Use faster hash? ahash?
+        let mut set = HashSet::with_capacity(n);
+        for loc in 0..n {
+            let idx = indices.get(loc);
             bounds.enclose_index(idx);
             if !set.insert(idx) {
                 return Err(NonUniqueIndex);
@@ -44,20 +46,21 @@ impl<Idx: RecordIndex> CheckedIndexList<Idx> {
     }
 }
 
-unsafe impl<Idx> IndexList for CheckedIndexList<Idx>
+unsafe impl<Indices> IndexList for CheckedIndexList<Indices>
 where
-    Idx: RecordIndex + Send + Sync,
+    Indices: IndexList,
+    Indices::Index: RecordIndex,
 {
-    type Index = Idx;
+    type Index = Indices::Index;
 
     const ALWAYS_BOUNDED: bool = true;
 
     unsafe fn get_unchecked(&self, i: usize) -> Self::Index {
-        *self.indices.get_unchecked(i)
+        self.indices.get_unchecked(i)
     }
 
     fn num_indices(&self) -> usize {
-        self.indices.len()
+        self.indices.num_indices()
     }
 
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
@@ -65,4 +68,9 @@ where
     }
 }
 
-unsafe impl<Idx> UniqueIndexList for CheckedIndexList<Idx> where Idx: RecordIndex + Send + Sync {}
+unsafe impl<Indices> UniqueIndexList for CheckedIndexList<Indices>
+where
+    Indices: IndexList,
+    Indices::Index: RecordIndex,
+{
+}
