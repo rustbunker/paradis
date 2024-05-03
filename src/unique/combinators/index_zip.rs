@@ -1,5 +1,4 @@
-use crate::unique::unique_indices::IndexList;
-use crate::unique::UniqueIndexList;
+use crate::unique::{IndexList, UniqueIndexList};
 use paradis_core::Bounds;
 
 /// The result of zipping two *equal-length* index sets.

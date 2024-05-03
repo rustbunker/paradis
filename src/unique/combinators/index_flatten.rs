@@ -1,6 +1,5 @@
 use crate::internal::Sealed;
-use crate::unique::unique_indices::IndexList;
-use crate::unique::UniqueIndexList;
+use crate::unique::{IndexList, UniqueIndexList};
 use paradis_core::Bounds;
 
 /// An index combinator that flattens nested tuples.

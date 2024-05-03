@@ -4,12 +4,12 @@ use paradis_core::{IntoParAccess, RecordIndex};
 pub mod combinators;
 
 mod checked_unique;
+mod index_list;
 mod repeat;
-mod unique_indices;
 
 pub use checked_unique::CheckedUnique;
+pub use index_list::{IndexList, IndexedAccess, UniqueIndexList};
 pub use repeat::Repeat;
-pub use unique_indices::{IndexList, IndexedAccess, UniqueIndexList};
 
 /// An error indicating that indices were out of bounds.
 #[derive(Debug, Clone, PartialEq, Eq)]

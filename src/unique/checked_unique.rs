@@ -1,5 +1,4 @@
-use crate::unique::unique_indices::IndexList;
-use crate::unique::UniqueIndexList;
+use crate::unique::{IndexList, UniqueIndexList};
 use crate::RecordIndex;
 use paradis_core::Bounds;
 use std::collections::HashSet;
