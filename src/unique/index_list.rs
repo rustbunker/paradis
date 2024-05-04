@@ -280,6 +280,7 @@ unsafe impl IndexList for Range<usize> {
         self.end.saturating_sub(self.start)
     }
 
+    #[inline]
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
         Some(Bounds {
             offset: self.start,
@@ -304,6 +305,7 @@ unsafe impl IndexList for RangeInclusive<usize> {
         self.clone().count()
     }
 
+    #[inline]
     fn bounds(&self) -> Option<Bounds<Self::Index>> {
         Some(Bounds {
             offset: *self.start(),
