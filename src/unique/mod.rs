@@ -9,7 +9,7 @@ mod repeat;
 
 use crate::error::OutOfBounds;
 pub use checked_unique::CheckedUnique;
-pub use index_list::{IndexList, IndexedAccess, UniqueIndexList};
+pub use index_list::{IndexList, NarrowedAccess, UniqueIndexList};
 pub use repeat::Repeat;
 
 /// Narrows an access object to a subset of its index set.
@@ -26,7 +26,7 @@ pub use repeat::Repeat;
 pub fn narrow_access_to_indices<IntoAccess, Indices>(
     access: IntoAccess,
     indices: &Indices,
-) -> Result<IndexedAccess<'_, Indices, IntoAccess::Access>, OutOfBounds>
+) -> Result<NarrowedAccess<'_, Indices, IntoAccess::Access>, OutOfBounds>
 where
     // TODO: Is the Sized bound necessary? Do we want it? The alternative is to sprinkle
     // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
@@ -34,5 +34,5 @@ where
     Indices::Index: RecordIndex,
     IntoAccess: IntoParAccess<Indices::Index>,
 {
-    IndexedAccess::try_new(indices, access.into_par_access())
+    NarrowedAccess::try_new(indices, access.into_par_access())
 }

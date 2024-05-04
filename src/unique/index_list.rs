@@ -167,7 +167,7 @@ pub unsafe trait UniqueIndexList: IndexList {}
 
 unsafe impl<'a, I: UniqueIndexList> UniqueIndexList for &'a I {}
 
-/// An access object that has been narrowed to a subset of its index set.
+/// An access object that has been narrowed to a subset of its indices.
 ///
 /// This is the result type for
 /// [compose_access_with_indices](crate::unique::narrow_access_to_indices).
@@ -179,13 +179,13 @@ unsafe impl<'a, I: UniqueIndexList> UniqueIndexList for &'a I {}
 /// all bounds checks are statically eliminated (currently we rely on
 /// compiler optimizations to eliminate those)
 #[derive(Debug)]
-pub struct IndexedAccess<'a, Indices, Access> {
+pub struct NarrowedAccess<'a, Indices, Access> {
     indices: &'a Indices,
     access: Access,
     verified_in_bounds: bool,
 }
 
-impl<'a, Indices, Access> IndexedAccess<'a, Indices, Access>
+impl<'a, Indices, Access> NarrowedAccess<'a, Indices, Access>
 where
     Indices: IndexList,
     Indices::Index: RecordIndex,
@@ -221,7 +221,7 @@ where
     }
 }
 
-unsafe impl<'a, Indices, Access> ParAccess<usize> for IndexedAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> ParAccess<usize> for NarrowedAccess<'a, Indices, Access>
 where
     Indices: UniqueIndexList,
     Indices::Index: RecordIndex,
@@ -269,7 +269,7 @@ where
     }
 }
 
-unsafe impl<'a, Indices, Access> LinearParAccess for IndexedAccess<'a, Indices, Access>
+unsafe impl<'a, Indices, Access> LinearParAccess for NarrowedAccess<'a, Indices, Access>
 where
     Indices: UniqueIndexList,
     Indices::Index: RecordIndex,
