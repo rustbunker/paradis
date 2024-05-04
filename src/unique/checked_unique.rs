@@ -15,10 +15,12 @@ pub struct CheckedUnique<Indices: IndexList> {
 pub struct NonUniqueIndex;
 
 impl<Indices: IndexList> CheckedUnique<Indices> {
+    /// Obtain a reference to the underlying index list.
     pub fn get_inner(&self) -> &Indices {
         &self.indices
     }
 
+    /// Recover the underlying index list.
     pub fn into_inner(self) -> Indices {
         self.indices
     }
@@ -29,6 +31,14 @@ where
     Indices: IndexList,
     Indices::Index: RecordIndex,
 {
+    /// Check that the provided indices are unique.
+    ///
+    /// On success, wrap this object in [`CheckedUnique`]. The bounds of the index list
+    /// are computed at the same time.
+    ///
+    /// # Errors
+    ///
+    /// An error is returned if the indices are not unique.
     pub fn from_hashable_indices(indices: Indices) -> Result<Self, NonUniqueIndex>
     where
         Indices::Index: Hash,

@@ -71,8 +71,10 @@ pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
 
 /// A type that can be converted into a parallel access object.
 pub trait IntoParAccess<Index: Copy = usize> {
+    /// The access type obtained through this trait.
     type Access: ParAccess<Index>;
 
+    /// Obtain parallel access to this collection.
     fn into_par_access(self) -> Self::Access;
 }
 

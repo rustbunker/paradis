@@ -7,13 +7,16 @@ use rayon::iter::{IndexedParallelIterator, ParallelIterator};
 use crate::iter::AccessIterator;
 
 /// A parallel iterator for records in a collection.
+///
+/// Usually you do not need to interact with this directly.
+/// Use [`create_par_iter`] instead.
 #[derive(Debug)]
 pub struct LinearParAccessIter<Access> {
     access: Access,
 }
 
 impl<Access> LinearParAccessIter<Access> {
-    pub fn from_access<IntoAccess>(access: IntoAccess) -> Self
+    pub(crate) fn from_access<IntoAccess>(access: IntoAccess) -> Self
     where
         IntoAccess: IntoParAccess<Access = Access>,
         IntoAccess::Access: LinearParAccess,

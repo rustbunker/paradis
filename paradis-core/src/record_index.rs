@@ -3,11 +3,7 @@ use crate::internal::Sealed;
 /// A type suitable for use as an index into a collection of records.
 ///
 /// Any implementor of this trait must uphold the contract that if two indices compare unequal,
-/// then they do not index the same location.
-///
-/// TODO: I'm not sure if it's necessary to seal this trait, but until someone comes up with
-/// a compelling use case that requires implementing this trait outside of this crate,
-/// it's convenient to do so.
+/// then they do not index the same location. TODO: Write proper Safety section
 pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {
     // fn bounds_overlap(bounds1: &Bounds<Self>, bounds2: &Bounds<Self>) -> bool;
 
@@ -23,13 +19,19 @@ pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {
 
 /// Bounds associated with an index type.
 ///
-/// `Bounds` is essentially a generalization of `len`, i.e. the size of a one-dimensional data
-/// structure, to include an `offset` and a possibly multidimensional `extent` that describes
-/// the number of entries along each dimension. This way, `Bounds` can be used both to describe
-/// the bounds of an index list, or the bounds of a data structure.
-/// A motivating factor for this design is that it allows us to quickly check if
-/// the bounds of an index set are completely contained inside the bounds of a data structure,
-/// which allows us to eliminate bounds checks.
+/// This is a description of the bounds of a multidimensional array, through the definition of
+/// an *offset* and an *extent*. [`Bounds`] can also be used to describe the bounds of an
+/// index list, which can be used to ensure that a collection of indices are *all* in bounds,
+/// and therefore bounds checks can be eliminated up front, prior to iteration.
+///
+/// In general, [`Bounds`] is expected to be used with either integers like `usize` for
+/// one-dimensional arrays or tuples like `(usize, usize)` for multidimensional arrays.
+/// For data structures, the offset is typically zero along each dimension, and the `extent`
+/// describes the "length" of the array along each dimension.
+///
+/// *Offset* primarily exists in order for index lists to more tightly describe their bounds,
+/// which can be used, for example, to ensure that index lists with disjoint bounds contain
+/// disjoint indices.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Bounds<I> {
     pub offset: I,
@@ -37,6 +39,7 @@ pub struct Bounds<I> {
 }
 
 impl<I> Bounds<I> {
+    /// Zips the offset and extent of two [`Bounds`] instances.
     pub fn zip<I2>(self, other: Bounds<I2>) -> Bounds<(I, I2)> {
         Bounds {
             offset: (self.offset, other.offset),
@@ -46,22 +49,28 @@ impl<I> Bounds<I> {
 }
 
 impl<I: RecordIndex> Bounds<I> {
+    /// Check if these bounds contain `other`.
     pub fn contains_bounds(&self, other: &Bounds<I>) -> bool {
         I::contains_bounds(self, other)
     }
 
+    /// Check if these bounds contain the given index.
     pub fn contains_index(&self, index: I) -> bool {
         index.in_bounds(self)
     }
 
+    /// Expand these bounds — if needed — so that the given index is contained in the
+    /// updated bounds.
     pub fn enclose_index(&mut self, index: I) {
         I::enclose_index(self, index)
     }
 
+    /// Constructs empty bounds (zero extent along each dimension).
     pub fn new_empty() -> Self {
         I::empty_bounds()
     }
 
+    /// Constructs bounds large enough to hold only exactly the given index.
     pub fn bounds_for_index(index: I) -> Self {
         I::bounds_for_index(index)
     }

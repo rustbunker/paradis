@@ -11,19 +11,34 @@ use std::ops::{Range, RangeInclusive};
 
 /// A finite list of indices.
 pub unsafe trait IndexList: Sync + Send {
+    /// The index type contained in this index list.
     type Index: Copy;
 
+    /// Signals whether this index list is *always* bounded.
+    ///
+    /// This means that [`bounds`](Self::bounds) never returns `None`. This can be used to statically eliminate
+    /// bounds checks in some circumstances.
     const ALWAYS_BOUNDED: bool;
 
+    /// Obtain the index at the given location.
+    ///
+    /// No bounds checks are performed.
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index;
 
+    /// The number of indices in this index list.
     fn num_indices(&self) -> usize;
 
+    /// Return the tightest bounds that contain all indices in this index list, if possible.
     fn bounds(&self) -> Option<Bounds<Self::Index>>;
 
-    fn get_index(&self, i: usize) -> Self::Index {
-        assert!(i < self.num_indices(), "Index must be in bounds");
-        unsafe { self.get_index_unchecked(i) }
+    /// Returns the index at the given location.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the location is out of bounds.
+    fn get_index(&self, loc: usize) -> Self::Index {
+        assert!(loc < self.num_indices(), "Index must be in bounds");
+        unsafe { self.get_index_unchecked(loc) }
     }
 
     /// Casts indices in this collection to the desired type.
@@ -82,7 +97,7 @@ pub unsafe trait IndexList: Sync + Send {
     /// # Panics
     ///
     /// Panics if the other index set does not have the same number of elements as this index set.
-    /// This behavior is distinct from Iterator::zip, which instead ignores elements in the longer
+    /// This behavior is distinct from [`Iterator::zip`], which instead ignores elements in the longer
     /// collection.
     fn index_azip<I: IndexList>(self, other: I) -> IndexAZip<Self, I>
     where

@@ -2,11 +2,26 @@
 use crate::{Bounds, IntoParAccess, LinearParAccess, ParAccess};
 use std::marker::PhantomData;
 
+/// Parallel access to a mutable slice.
 #[derive(Debug)]
 pub struct ParSliceAccessMut<'a, T> {
     ptr: *mut T,
     len: usize,
     marker: PhantomData<&'a mut T>,
+}
+
+impl<'a, T> ParSliceAccessMut<'a, T> {
+    /// Obtain parallel access to a mutable slice.
+    ///
+    /// In most cases, prefer to go through the implementation of [`IntoParAccess`] instead of this
+    /// method directly.
+    pub fn from_slice_mut(slice: &'a mut [T]) -> Self {
+        Self {
+            ptr: slice.as_mut_ptr(),
+            len: slice.len(),
+            marker: PhantomData,
+        }
+    }
 }
 
 unsafe impl<'a, T: Sync> Sync for ParSliceAccessMut<'a, T> {}
@@ -46,11 +61,7 @@ impl<'a, T: Sync + Send> IntoParAccess<usize> for &'a mut [T] {
     type Access = ParSliceAccessMut<'a, T>;
 
     fn into_par_access(self) -> Self::Access {
-        ParSliceAccessMut {
-            ptr: self.as_mut_ptr(),
-            len: self.len(),
-            marker: PhantomData,
-        }
+        ParSliceAccessMut::from_slice_mut(self)
     }
 }
 

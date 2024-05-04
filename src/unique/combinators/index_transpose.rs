@@ -44,8 +44,10 @@ where
 
 /// Transpose an index, i.e. reversing the order in a tuple.
 pub trait Transpose {
+    /// The result of the transposition.
     type Transposed;
 
+    /// Transpose this object.
     fn transpose(self) -> Self::Transposed;
 }
 

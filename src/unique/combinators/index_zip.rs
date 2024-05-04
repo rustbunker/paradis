@@ -18,6 +18,11 @@ where
     A: IndexList,
     B: IndexList,
 {
+    /// Zip two index lists.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the two index lists do not have the same number of indices.
     pub fn new(a: A, b: B) -> Self {
         assert_eq!(
             a.num_indices(),
@@ -79,6 +84,11 @@ where
     A: IndexList,
     B: IndexList,
 {
+    /// Zip two index lists.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the two index lists do not have the same number of indices.
     pub fn new(a: A, b: B) -> Self {
         assert_eq!(
             a.num_indices(),

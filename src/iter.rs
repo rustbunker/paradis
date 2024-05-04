@@ -19,6 +19,9 @@ where
 }
 
 /// A sequential iterator for a linear access object.
+///
+/// Usually you do not need to interact with this directly.
+/// Use [`create_iter`] instead.
 #[derive(Debug)]
 pub struct AccessIterator<Access> {
     access: Access,

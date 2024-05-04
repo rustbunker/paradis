@@ -45,8 +45,10 @@ where
 /// This is part of the machinery that drives
 /// [IndexList::index_flatten][crate::unique::IndexList::index_flatten].
 pub trait Concatenate<T>: Sealed {
+    /// The result of the concatenation.
     type Concatenated;
 
+    /// Concatenate this object with another object.
     fn concatenate(self, other: T) -> Self::Concatenated;
 }
 
@@ -58,8 +60,10 @@ pub type Concatenated<A, B> = <A as Concatenate<B>>::Concatenated;
 /// This is part of the machinery that drives
 /// [IndexList::index_flatten][crate::unique::IndexList::index_flatten].
 pub trait Flatten: Sealed {
+    /// The result of flattening this type.
     type Flattened;
 
+    /// Flatten this type.
     fn flatten(self) -> Self::Flattened;
 }
 
