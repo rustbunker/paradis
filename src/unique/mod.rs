@@ -16,6 +16,8 @@ pub use repeat::Repeat;
 
 /// Narrows an access object to a subset of its index set.
 ///
+/// The indices must be unique, which is ensured through the [`UniqueIndexList`] trait.
+///
 /// # Errors
 ///
 /// Returns an [`OutOfBounds`] error if the index bounds are not
