@@ -2,6 +2,7 @@ use crate::IntoParAccess;
 use paradis_core::LinearParAccess;
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
+use crate::iter::AccessIterator;
 
 /// A parallel iterator for records in a collection.
 #[derive(Debug)]
@@ -35,60 +36,15 @@ struct AccessProducer<Access> {
     end_idx: usize,
 }
 
-impl<Access> Iterator for AccessProducer<Access>
-where
-    Access: LinearParAccess,
-{
-    type Item = Access::Record;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.start_idx < self.end_idx {
-            // SAFETY: This is sound because our start and end indices are derived
-            // from the size returned by the access object, therefore we can
-            // infer that we're in bounds. We also never give out the same record twice
-            let item = unsafe { self.access.get_unsync_unchecked(self.start_idx) };
-            self.start_idx += 1;
-            Some(item)
-        } else {
-            None
-        }
-    }
-}
-
-impl<Access> ExactSizeIterator for AccessProducer<Access> where Access: LinearParAccess {}
-
-impl<Access> DoubleEndedIterator for AccessProducer<Access>
-where
-    Access: LinearParAccess,
-{
-    fn next_back(&mut self) -> Option<Self::Item> {
-        // TODO: Need to test this impl
-        if self.end_idx > self.start_idx {
-            self.end_idx -= 1;
-            // SAFETY: This is sound because our start and end indices are derived
-            // from the size returned by the access object, therefore we can
-            // infer that we're in bounds. We also never give out the same record twice
-            let item = unsafe { self.access.get_unsync_unchecked(self.end_idx) };
-            Some(item)
-        } else {
-            None
-        }
-    }
-}
-
 impl<Access> Producer for AccessProducer<Access>
 where
     Access: LinearParAccess,
 {
     type Item = Access::Record;
-    type IntoIter = Self;
+    type IntoIter = AccessIterator<Access>;
 
     fn into_iter(self) -> Self::IntoIter {
-        AccessProducer {
-            access: self.access,
-            start_idx: self.start_idx,
-            end_idx: self.end_idx,
-        }
+        AccessIterator::new_for_range(self.access, self.start_idx .. self.end_idx)
     }
 
     fn split_at(self, index: usize) -> (Self, Self) {
