@@ -1,3 +1,5 @@
+//! Interoperability with `rayon` parallel iterators.
+//!
 use crate::IntoParAccess;
 use paradis_core::LinearParAccess;
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};

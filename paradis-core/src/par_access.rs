@@ -69,6 +69,7 @@ pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
     unsafe fn get_unsync_unchecked(&self, index: Index) -> Self::Record;
 }
 
+/// A type that can be converted into a parallel access object.
 pub trait IntoParAccess<Index: Copy = usize> {
     type Access: ParAccess<Index>;
 

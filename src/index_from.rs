@@ -1,7 +1,16 @@
 use crate::internal;
 use crate::RecordIndex;
 
+/// Enables conversion of indices.
+///
+/// This trait is *sealed*, meaning that it cannot be implemented for external types.
+/// The intention behind this trait is to permit converting e.g. `u16` or `u32` type indices
+/// (or tuples thereof) to `usize`-based indices. This is primarily useful for saving space
+/// when the indices need to be explicitly stored.
+///
+/// TODO: Extend impls to higher-arity tuples
 pub trait IndexFrom<SourceIndex>: internal::Sealed {
+    /// Convert the source index to `Self`, the target index type.
     fn index_from(source: SourceIndex) -> Self;
 }
 
