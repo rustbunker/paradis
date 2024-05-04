@@ -34,7 +34,7 @@ pub fn narrow_access_to_indices<IntoAccess, Indices>(
 where
     // TODO: Is the Sized bound necessary? Do we want it? The alternative is to sprinkle
     // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
-    Indices: UniqueIndexList + Sized,
+    Indices: UniqueIndexList,
     Indices::Index: RecordIndex,
     IntoAccess: IntoParAccess<Indices::Index>,
 {
