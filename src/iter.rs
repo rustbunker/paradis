@@ -3,9 +3,9 @@
 //! While intended primarily for parallel access, a parallel access object
 //! can also be used to construct *sequential* iterators.
 
+use paradis_core::{IntoParAccess, LinearParAccess};
 use std::cmp::max;
 use std::ops::Range;
-use paradis_core::{IntoParAccess, LinearParAccess};
 
 /// Constructs a sequential iterator for the provided access object.
 pub fn create_iter<IntoAccess>(access: IntoAccess) -> AccessIterator<IntoAccess::Access>
@@ -15,7 +15,7 @@ where
 {
     let access = access.into_par_access();
     let len = access.len();
-    AccessIterator::new_for_range(access, 0 .. len)
+    AccessIterator::new_for_range(access, 0..len)
 }
 
 /// A sequential iterator for a linear access object.

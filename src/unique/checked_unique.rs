@@ -1,3 +1,4 @@
+use crate::error::NonUniqueIndex;
 use crate::unique::{IndexList, UniqueIndexList};
 use crate::RecordIndex;
 use paradis_core::Bounds;
@@ -10,9 +11,6 @@ pub struct CheckedUnique<Indices: IndexList> {
     indices: Indices,
     bounds: Bounds<Indices::Index>,
 }
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct NonUniqueIndex;
 
 impl<Indices: IndexList> CheckedUnique<Indices> {
     /// Obtain a reference to the underlying index list.

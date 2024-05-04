@@ -1,8 +1,8 @@
-use crate::unique::checked_unique::NonUniqueIndex;
+use crate::error::{NonUniqueIndex, OutOfBounds};
 use crate::unique::combinators::{
     IndexAZip, IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip,
 };
-use crate::unique::{CheckedUnique, OutOfBounds};
+use crate::unique::CheckedUnique;
 use crate::IndexFrom;
 use paradis_core::{Bounds, LinearParAccess, ParAccess, RecordIndex};
 use std::any::type_name;

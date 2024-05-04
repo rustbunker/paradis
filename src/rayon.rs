@@ -1,10 +1,10 @@
 //! Interoperability with `rayon` parallel iterators.
 //!
+use crate::iter::AccessIterator;
 use crate::IntoParAccess;
 use paradis_core::LinearParAccess;
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
-use crate::iter::AccessIterator;
 
 /// A parallel iterator for records in a collection.
 ///
@@ -49,7 +49,7 @@ where
     type IntoIter = AccessIterator<Access>;
 
     fn into_iter(self) -> Self::IntoIter {
-        AccessIterator::new_for_range(self.access, self.start_idx .. self.end_idx)
+        AccessIterator::new_for_range(self.access, self.start_idx..self.end_idx)
     }
 
     fn split_at(self, index: usize) -> (Self, Self) {

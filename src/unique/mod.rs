@@ -7,14 +7,10 @@ mod checked_unique;
 mod index_list;
 mod repeat;
 
+use crate::error::OutOfBounds;
 pub use checked_unique::CheckedUnique;
 pub use index_list::{IndexList, IndexedAccess, UniqueIndexList};
 pub use repeat::Repeat;
-
-/// An error indicating that indices were out of bounds.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct OutOfBounds;
 
 /// Narrows an access object to a subset of its index set.
 ///

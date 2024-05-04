@@ -4,8 +4,8 @@
 
 #![warn(missing_docs)]
 
+pub mod error;
 pub mod iter;
-
 #[cfg(feature = "rayon")]
 pub mod rayon;
 pub mod unique;
