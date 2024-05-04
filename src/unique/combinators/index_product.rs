@@ -18,11 +18,11 @@ where
     type Index = (A::Index, B::Index);
     const ALWAYS_BOUNDED: bool = A::ALWAYS_BOUNDED && B::ALWAYS_BOUNDED;
 
-    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
+    unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
         let m = self.1.num_indices();
         let i = loc / m;
         let j = loc % m;
-        (self.0.get_unchecked(i), self.1.get_unchecked(j))
+        (self.0.get_index_unchecked(i), self.1.get_index_unchecked(j))
     }
 
     fn num_indices(&self) -> usize {
@@ -51,14 +51,14 @@ mod tests {
         let product = IndexProduct(0..3, 1..4);
         assert_eq!(product.num_indices(), 9);
 
-        assert_eq!(product.get(0), (0, 1));
-        assert_eq!(product.get(1), (0, 2));
-        assert_eq!(product.get(2), (0, 3));
-        assert_eq!(product.get(3), (1, 1));
-        assert_eq!(product.get(4), (1, 2));
-        assert_eq!(product.get(5), (1, 3));
-        assert_eq!(product.get(6), (2, 1));
-        assert_eq!(product.get(7), (2, 2));
-        assert_eq!(product.get(8), (2, 3));
+        assert_eq!(product.get_index(0), (0, 1));
+        assert_eq!(product.get_index(1), (0, 2));
+        assert_eq!(product.get_index(2), (0, 3));
+        assert_eq!(product.get_index(3), (1, 1));
+        assert_eq!(product.get_index(4), (1, 2));
+        assert_eq!(product.get_index(5), (1, 3));
+        assert_eq!(product.get_index(6), (2, 1));
+        assert_eq!(product.get_index(7), (2, 2));
+        assert_eq!(product.get_index(8), (2, 3));
     }
 }

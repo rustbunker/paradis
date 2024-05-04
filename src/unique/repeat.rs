@@ -29,7 +29,7 @@ unsafe impl<I: RecordIndex> IndexList for Repeat<I> {
 
     const ALWAYS_BOUNDED: bool = true;
 
-    unsafe fn get_unchecked(&self, _: usize) -> Self::Index {
+    unsafe fn get_index_unchecked(&self, _: usize) -> Self::Index {
         self.value
     }
 

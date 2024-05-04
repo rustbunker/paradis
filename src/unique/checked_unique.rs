@@ -41,11 +41,11 @@ where
             });
         }
 
-        let mut bounds = Bounds::bounds_for_index(indices.get(0));
+        let mut bounds = Bounds::bounds_for_index(indices.get_index(0));
         // TODO: Use faster hash? ahash?
         let mut set = HashSet::with_capacity(n);
         for loc in 0..n {
-            let idx = indices.get(loc);
+            let idx = indices.get_index(loc);
             bounds.enclose_index(idx);
             if !set.insert(idx) {
                 return Err(NonUniqueIndex);
@@ -65,8 +65,8 @@ where
 
     const ALWAYS_BOUNDED: bool = true;
 
-    unsafe fn get_unchecked(&self, i: usize) -> Self::Index {
-        self.indices.get_unchecked(i)
+    unsafe fn get_index_unchecked(&self, i: usize) -> Self::Index {
+        self.indices.get_index_unchecked(i)
     }
 
     fn num_indices(&self) -> usize {

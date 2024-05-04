@@ -15,15 +15,15 @@ pub unsafe trait IndexList: Sync + Send {
 
     const ALWAYS_BOUNDED: bool;
 
-    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index;
+    unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index;
 
     fn num_indices(&self) -> usize;
 
     fn bounds(&self) -> Option<Bounds<Self::Index>>;
 
-    fn get(&self, i: usize) -> Self::Index {
+    fn get_index(&self, i: usize) -> Self::Index {
         assert!(i < self.num_indices(), "Index must be in bounds");
-        unsafe { self.get_unchecked(i) }
+        unsafe { self.get_index_unchecked(i) }
     }
 
     /// Casts indices in this collection to the desired type.
@@ -132,8 +132,8 @@ unsafe impl<'a, I: IndexList> IndexList for &'a I {
 
     const ALWAYS_BOUNDED: bool = I::ALWAYS_BOUNDED;
 
-    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
-        I::get_unchecked(self, loc)
+    unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
+        I::get_index_unchecked(self, loc)
     }
 
     fn num_indices(&self) -> usize {
@@ -234,7 +234,7 @@ where
     unsafe fn get_unsync_unchecked(&self, loc: usize) -> Self::Record {
         // SAFETY: Since this is an unchecked method, we can always directly try to obtain
         // the index at the requested location in the index list
-        let index = self.indices.get_unchecked(loc);
+        let index = self.indices.get_index_unchecked(loc);
         if Indices::ALWAYS_BOUNDED {
             // This branch hopefully allows us to completely eliminate all branches
             // whenever we're able to statically prove that bounds checking is unnecessary
@@ -271,7 +271,7 @@ unsafe impl IndexList for Range<usize> {
     const ALWAYS_BOUNDED: bool = true;
 
     #[inline(always)]
-    unsafe fn get_unchecked(&self, i: usize) -> usize {
+    unsafe fn get_index_unchecked(&self, i: usize) -> usize {
         self.start + i
     }
 
@@ -295,7 +295,7 @@ unsafe impl IndexList for RangeInclusive<usize> {
     const ALWAYS_BOUNDED: bool = true;
 
     #[inline(always)]
-    unsafe fn get_unchecked(&self, i: usize) -> usize {
+    unsafe fn get_index_unchecked(&self, i: usize) -> usize {
         self.start() + i
     }
 
@@ -318,7 +318,7 @@ unsafe impl<I: Copy + Send + Sync> IndexList for Vec<I> {
     type Index = I;
     const ALWAYS_BOUNDED: bool = false;
 
-    unsafe fn get_unchecked(&self, loc: usize) -> Self::Index {
+    unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
         *<[I]>::get_unchecked(self.as_slice(), loc)
     }
 
