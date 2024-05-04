@@ -170,7 +170,7 @@ unsafe impl<'a, I: UniqueIndexList> UniqueIndexList for &'a I {}
 /// An access object that has been narrowed to a subset of its indices.
 ///
 /// This is the result type for
-/// [compose_access_with_indices](crate::unique::narrow_access_to_indices).
+/// [`narrow_access_to_indices`](crate::unique::narrow_access_to_indices).
 ///
 /// TODO: Move this struct into its own file to ensure more control over its field
 /// (incorrect access from other pieces of the code could lead to soundness issues)
