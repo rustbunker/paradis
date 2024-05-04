@@ -5,11 +5,13 @@ pub mod combinators;
 
 mod checked_unique;
 mod index_list;
+mod narrowed_access;
 mod repeat;
 
 use crate::error::OutOfBounds;
 pub use checked_unique::CheckedUnique;
-pub use index_list::{IndexList, NarrowedAccess, UniqueIndexList};
+pub use index_list::{IndexList, UniqueIndexList};
+pub use narrowed_access::NarrowedAccess;
 pub use repeat::Repeat;
 
 /// Narrows an access object to a subset of its index set.
