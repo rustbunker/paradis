@@ -5,6 +5,7 @@ pub mod combinators;
 
 mod checked_unique;
 mod index_list;
+mod index_list_impl_std;
 mod narrowed_access;
 mod repeat;
 
