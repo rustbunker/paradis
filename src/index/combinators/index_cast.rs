@@ -1,11 +1,11 @@
-use crate::unique::{IndexList, UniqueIndexList};
+use crate::index::{IndexList, UniqueIndexList};
 use crate::{IndexFrom, RecordIndex};
 use paradis_core::Bounds;
 use std::marker::PhantomData;
 
 /// Cast indices in a source index list to the target index type.
 ///
-/// See [IndexList::index_cast](crate::unique::IndexList::index_cast).
+/// See [IndexList::index_cast](crate::index::IndexList::index_cast).
 #[derive(Debug)]
 pub struct IndexCast<Indices, TargetIndex> {
     pub(crate) source_indices: Indices,

@@ -1,6 +1,6 @@
 use divan::Bencher;
+use paradis::index::{narrow_access_to_indices, CheckedUnique};
 use paradis::rayon::create_par_iter;
-use paradis::unique::{narrow_access_to_indices, CheckedUnique};
 use paradis_core::{IntoParAccess, ParAccess};
 use rayon::iter::{IntoParallelRefIterator, IntoParallelRefMutIterator, ParallelIterator};
 use rayon::ThreadPoolBuilder;

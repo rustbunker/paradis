@@ -1,4 +1,4 @@
-use crate::unique::IndexList;
+use crate::index::IndexList;
 use crate::RecordIndex;
 use paradis_core::Bounds;
 

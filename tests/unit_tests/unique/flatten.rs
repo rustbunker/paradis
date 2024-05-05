@@ -1,4 +1,4 @@
-use paradis::unique::combinators::{Concatenate, Flatten};
+use paradis::index::combinators::{Concatenate, Flatten};
 
 #[test]
 fn test_concatenate() {

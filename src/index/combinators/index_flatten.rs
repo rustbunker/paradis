@@ -1,10 +1,10 @@
+use crate::index::{IndexList, UniqueIndexList};
 use crate::internal::Sealed;
-use crate::unique::{IndexList, UniqueIndexList};
 use paradis_core::Bounds;
 
 /// An index combinator that flattens nested tuples.
 ///
-/// See [IndexList::index_flatten](crate::unique::IndexList::index_flatten).
+/// See [IndexList::index_flatten](crate::index::IndexList::index_flatten).
 pub struct IndexFlatten<SourceIndices>(pub(crate) SourceIndices);
 
 unsafe impl<SourceIndices> IndexList for IndexFlatten<SourceIndices>
@@ -43,7 +43,7 @@ where
 /// Concatenate tuples.
 ///
 /// This is part of the machinery that drives
-/// [IndexList::index_flatten][crate::unique::IndexList::index_flatten].
+/// [IndexList::index_flatten][crate::index::IndexList::index_flatten].
 pub trait Concatenate<T>: Sealed {
     /// The result of the concatenation.
     type Concatenated;
@@ -58,7 +58,7 @@ pub type Concatenated<A, B> = <A as Concatenate<B>>::Concatenated;
 /// Flatten nested tuples.
 ///
 /// This is part of the machinery that drives
-/// [IndexList::index_flatten][crate::unique::IndexList::index_flatten].
+/// [IndexList::index_flatten][crate::index::IndexList::index_flatten].
 pub trait Flatten: Sealed {
     /// The result of flattening this type.
     type Flattened;

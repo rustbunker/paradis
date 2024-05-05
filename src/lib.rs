@@ -5,10 +5,10 @@
 #![warn(missing_docs)]
 
 pub mod error;
+pub mod index;
 pub mod iter;
 #[cfg(feature = "rayon")]
 pub mod rayon;
-pub mod unique;
 
 mod index_from;
 

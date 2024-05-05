@@ -1,12 +1,12 @@
 use crate::error::OutOfBounds;
-use crate::unique::{IndexList, UniqueIndexList};
+use crate::index::{IndexList, UniqueIndexList};
 use crate::{Bounds, LinearParAccess, ParAccess, RecordIndex};
 use std::any::type_name;
 
 /// An access object that has been narrowed to a subset of its indices.
 ///
 /// This is the result type for
-/// [`narrow_access_to_indices`](crate::unique::narrow_access_to_indices).
+/// [`narrow_access_to_indices`](crate::index::narrow_access_to_indices).
 ///
 /// TODO: Provide method like `.ensure_in_bounds()` that ensures that
 /// all bounds checks are statically eliminated (currently we rely on

@@ -1,5 +1,5 @@
 use crate::error::NonUniqueIndex;
-use crate::unique::{IndexList, UniqueIndexList};
+use crate::index::{IndexList, UniqueIndexList};
 use crate::RecordIndex;
 use paradis_core::Bounds;
 use std::collections::HashSet;

@@ -1,6 +1,6 @@
 use divan::Bencher;
+use paradis::index::narrow_access_to_indices;
 use paradis::iter::create_iter;
-use paradis::unique::narrow_access_to_indices;
 use paradis_core::IntoParAccess;
 use std::hint::black_box;
 

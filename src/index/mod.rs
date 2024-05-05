@@ -1,4 +1,4 @@
-//! Parallel iteration of collections indexed by unique indices.
+//! Construction of index lists, and facilities for access narrowing.
 use paradis_core::{IntoParAccess, RecordIndex};
 
 pub mod combinators;

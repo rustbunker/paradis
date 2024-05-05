@@ -1,9 +1,9 @@
-use crate::unique::{IndexList, UniqueIndexList};
+use crate::index::{IndexList, UniqueIndexList};
 use paradis_core::Bounds;
 
 /// An index combinator that transposed indices.
 ///
-/// See [IndexList::index_transpose](crate::unique::IndexList::index_transpose).
+/// See [IndexList::index_transpose](crate::index::IndexList::index_transpose).
 #[derive(Debug)]
 pub struct IndexTranspose<I>(pub I);
 

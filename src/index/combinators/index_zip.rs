@@ -1,9 +1,9 @@
-use crate::unique::{IndexList, UniqueIndexList};
+use crate::index::{IndexList, UniqueIndexList};
 use paradis_core::Bounds;
 
 /// The result of zipping two *equal-length* index sets.
 ///
-/// See [IndexList::index_zip](crate::unique::IndexList::index_zip) for more
+/// See [IndexList::index_zip](crate::index::IndexList::index_zip) for more
 /// information.
 ///
 /// TODO: Currently we require that A: UniqueIndexList and B: IndexList, but it should ideally
@@ -74,7 +74,7 @@ where
 
 /// [`IndexZip`] where uniqueness is determined by the *second* argument.
 ///
-/// See [IndexList::index_azip](crate::unique::IndexList::index_azip) for more
+/// See [IndexList::index_azip](crate::index::IndexList::index_azip) for more
 /// information.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IndexAZip<A, B>(A, B);

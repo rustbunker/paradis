@@ -1,8 +1,8 @@
 use crate::error::NonUniqueIndex;
-use crate::unique::combinators::{
+use crate::index::combinators::{
     IndexAZip, IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip,
 };
-use crate::unique::CheckedUnique;
+use crate::index::CheckedUnique;
 use crate::{Bounds, IndexFrom, RecordIndex};
 use std::hash::Hash;
 use std::ops::{Range, RangeInclusive};

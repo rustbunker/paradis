@@ -1,4 +1,4 @@
-use crate::unique::{IndexList, UniqueIndexList};
+use crate::index::{IndexList, UniqueIndexList};
 use paradis_core::Bounds;
 
 /// A Cartesian product of index sets.
@@ -43,8 +43,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::unique::combinators::IndexProduct;
-    use crate::unique::index_list::IndexList;
+    use crate::index::combinators::IndexProduct;
+    use crate::index::index_list::IndexList;
 
     #[test]
     fn index_product_basic_tests() {

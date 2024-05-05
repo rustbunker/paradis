@@ -1,6 +1,6 @@
+use paradis::index::narrow_access_to_indices;
+use paradis::index::IndexList;
 use paradis::rayon::create_par_iter;
-use paradis::unique::narrow_access_to_indices;
-use paradis::unique::IndexList;
 use rayon::iter::ParallelIterator;
 
 fn main() {
