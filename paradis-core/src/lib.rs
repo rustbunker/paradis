@@ -9,7 +9,7 @@
 mod par_access;
 mod record_index;
 
-pub use par_access::{IntoParAccess, LinearParAccess, ParAccess};
+pub use par_access::{BoundedParAccess, IntoParAccess, LinearParAccess, ParAccess};
 pub use record_index::{Bounds, RecordIndex};
 
 pub mod slice;

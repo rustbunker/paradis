@@ -1,6 +1,6 @@
 use paradis::index::{narrow_access_to_indices, IndexList};
 use paradis::rayon::create_par_iter;
-use paradis_core::{Bounds, ParAccess};
+use paradis_core::{BoundedParAccess, Bounds, ParAccess};
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
 
@@ -108,6 +108,19 @@ unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAc
         }
     }
 
+    unsafe fn get_unsync_unchecked(
+        &self,
+        (i, j, k, l): (usize, usize, usize, usize),
+    ) -> Self::Record {
+        let [m, n, p, _q] = self.dims;
+        let offset = m * n * p * i + n * p * j + p * k + l;
+        unsafe { &mut *self.ptr.add(offset) }
+    }
+}
+
+unsafe impl<'data, T> BoundedParAccess<(usize, usize, usize, usize)>
+    for FourDimArrayAccessMut<'data, T>
+{
     fn bounds(&self) -> Bounds<(usize, usize, usize, usize)> {
         Bounds {
             offset: (0, 0, 0, 0),
@@ -119,14 +132,5 @@ unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAc
     fn in_bounds(&self, (i, j, k, l): (usize, usize, usize, usize)) -> bool {
         let [m, n, p, q] = self.dims;
         i < m && j < n && k < p && l < q
-    }
-
-    unsafe fn get_unsync_unchecked(
-        &self,
-        (i, j, k, l): (usize, usize, usize, usize),
-    ) -> Self::Record {
-        let [m, n, p, _q] = self.dims;
-        let offset = m * n * p * i + n * p * j + p * k + l;
-        unsafe { &mut *self.ptr.add(offset) }
     }
 }

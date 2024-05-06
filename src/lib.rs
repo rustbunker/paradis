@@ -13,7 +13,9 @@ pub mod rayon;
 mod index_from;
 
 pub use index_from::IndexFrom;
-pub use paradis_core::{slice, Bounds, IntoParAccess, LinearParAccess, ParAccess, RecordIndex};
+pub use paradis_core::{
+    slice, BoundedParAccess, Bounds, IntoParAccess, LinearParAccess, ParAccess, RecordIndex,
+};
 
 mod internal {
     pub trait Sealed {}

@@ -1,4 +1,4 @@
-use paradis::{IntoParAccess, ParAccess};
+use paradis::{BoundedParAccess, IntoParAccess};
 use std::thread::scope;
 
 /// Multiply even numbers by 2, odd numbers by 4 by using separate threads for even and odd numbers.

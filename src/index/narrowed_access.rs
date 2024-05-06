@@ -1,6 +1,7 @@
 use crate::error::OutOfBounds;
 use crate::index::{IndexList, UniqueIndexList};
-use crate::{Bounds, LinearParAccess, ParAccess, RecordIndex};
+use crate::{BoundedParAccess, Bounds, LinearParAccess, RecordIndex};
+use paradis_core::ParAccess;
 use std::any::type_name;
 
 /// An access object that has been narrowed to a subset of its indices.
@@ -22,7 +23,7 @@ impl<'a, Indices, Access> NarrowedAccess<'a, Indices, Access>
 where
     Indices: IndexList,
     Indices::Index: RecordIndex,
-    Access: ParAccess<Indices::Index>,
+    Access: BoundedParAccess<Indices::Index>,
 {
     pub(crate) fn try_new(indices: &'a Indices, access: Access) -> Result<Self, OutOfBounds> {
         if let Some(index_bounds) = indices.bounds() {
@@ -58,7 +59,7 @@ unsafe impl<'a, Indices, Access> ParAccess<usize> for NarrowedAccess<'a, Indices
 where
     Indices: UniqueIndexList,
     Indices::Index: RecordIndex,
-    Access: ParAccess<Indices::Index>,
+    Access: BoundedParAccess<Indices::Index>,
 {
     type Record = Access::Record;
 
@@ -68,13 +69,6 @@ where
             indices: self.indices,
             access: unsafe { self.access.clone_access() },
             verified_in_bounds: self.verified_in_bounds,
-        }
-    }
-
-    fn bounds(&self) -> Bounds<usize> {
-        Bounds {
-            offset: 0,
-            extent: self.indices.num_indices(),
         }
     }
 
@@ -102,11 +96,25 @@ where
     }
 }
 
+unsafe impl<'a, Indices, Access> BoundedParAccess<usize> for NarrowedAccess<'a, Indices, Access>
+where
+    Indices: UniqueIndexList,
+    Indices::Index: RecordIndex,
+    Access: BoundedParAccess<Indices::Index>,
+{
+    fn bounds(&self) -> Bounds<usize> {
+        Bounds {
+            offset: 0,
+            extent: self.indices.num_indices(),
+        }
+    }
+}
+
 unsafe impl<'a, Indices, Access> LinearParAccess for NarrowedAccess<'a, Indices, Access>
 where
     Indices: UniqueIndexList,
     Indices::Index: RecordIndex,
-    Access: ParAccess<Indices::Index>,
+    Access: BoundedParAccess<Indices::Index>,
 {
     #[inline(always)]
     fn len(&self) -> usize {

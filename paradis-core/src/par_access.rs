@@ -1,5 +1,18 @@
 use crate::{Bounds, RecordIndex};
 
+pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
+    type Record;
+
+    unsafe fn clone_access(&self) -> Self;
+
+    /// Unsynchronized lookup of record without bounds checks.
+    ///
+    /// # Safety
+    ///
+    /// See trait documentation. TODO: Elaborate
+    unsafe fn get_unsync_unchecked(&self, index: Index) -> Self::Record;
+}
+
 /// Facilitates unsynchronized access to records stored in the collection.
 ///
 /// The trait provides *unsynchronized* access to (possibly mutable) *records*, defined by the
@@ -21,11 +34,7 @@ use crate::{Bounds, RecordIndex};
 ///   same index in the collection if either record is mutable.
 ///
 /// TODO: Make the invariants more precise
-pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
-    type Record;
-
-    unsafe fn clone_access(&self) -> Self;
-
+pub unsafe trait BoundedParAccess<Index: Copy>: ParAccess<Index> {
     /// The bounds of this data structure.
     ///
     /// # Safety
@@ -60,25 +69,18 @@ pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
         assert!(self.in_bounds(index), "index out of bounds");
         self.get_unsync_unchecked(index)
     }
-
-    /// Unsynchronized mutable lookup of record without bounds checks.
-    ///
-    /// # Safety
-    ///
-    /// See trait documentation. TODO: Elaborate
-    unsafe fn get_unsync_unchecked(&self, index: Index) -> Self::Record;
 }
 
 /// A type that can be converted into a parallel access object.
 pub trait IntoParAccess<Index: Copy = usize> {
     /// The access type obtained through this trait.
-    type Access: ParAccess<Index>;
+    type Access: BoundedParAccess<Index>;
 
     /// Obtain parallel access to this collection.
     fn into_par_access(self) -> Self::Access;
 }
 
-impl<Index: Copy, Access: ParAccess<Index>> IntoParAccess<Index> for Access {
+impl<Index: Copy, Access: BoundedParAccess<Index>> IntoParAccess<Index> for Access {
     type Access = Self;
 
     fn into_par_access(self) -> Self::Access {
@@ -87,7 +89,7 @@ impl<Index: Copy, Access: ParAccess<Index>> IntoParAccess<Index> for Access {
 }
 
 /// An unsynchronized access to an array-like structure, indexed by `usize`.
-pub unsafe trait LinearParAccess: ParAccess<usize> {
+pub unsafe trait LinearParAccess: BoundedParAccess<usize> {
     /// The number of accessible records.
     ///
     /// An implementor must ensure that this length never changes. In other words,

@@ -1,8 +1,8 @@
 use nalgebra::{dmatrix, DMatrix, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::index::{narrow_access_to_indices, IndexList, Repeat};
 use paradis::rayon::create_par_iter;
-use paradis::ParAccess;
-use paradis_core::{Bounds, LinearParAccess};
+use paradis::BoundedParAccess;
+use paradis_core::{Bounds, LinearParAccess, ParAccess};
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
 
@@ -50,7 +50,9 @@ unsafe impl<'a, T: Scalar> ParAccess<usize> for DMatrixColParAccessMut<'a, T> {
             DVectorViewMut::from_slice_generic(slice, Dyn(len), U1)
         }
     }
+}
 
+unsafe impl<'a, T: Scalar> BoundedParAccess<usize> for DMatrixColParAccessMut<'a, T> {
     #[inline(always)]
     fn in_bounds(&self, index: usize) -> bool {
         index < self.cols
@@ -104,6 +106,14 @@ unsafe impl<'a, T: Scalar> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a,
         }
     }
 
+    unsafe fn get_unsync_unchecked(&self, (i, j): (usize, usize)) -> Self::Record {
+        // Storage is col major
+        let linear_idx = j * self.rows + i;
+        &mut *self.ptr.add(linear_idx)
+    }
+}
+
+unsafe impl<'a, T: Scalar> BoundedParAccess<(usize, usize)> for DMatrixParAccessMut<'a, T> {
     fn bounds(&self) -> Bounds<(usize, usize)> {
         Bounds {
             offset: (0, 0),
@@ -113,12 +123,6 @@ unsafe impl<'a, T: Scalar> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a,
 
     fn in_bounds(&self, (i, j): (usize, usize)) -> bool {
         i < self.rows && j < self.cols
-    }
-
-    unsafe fn get_unsync_unchecked(&self, (i, j): (usize, usize)) -> Self::Record {
-        // Storage is col major
-        let linear_idx = j * self.rows + i;
-        &mut *self.ptr.add(linear_idx)
     }
 }
 

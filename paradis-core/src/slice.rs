@@ -1,5 +1,6 @@
 //! Core primitives for slices.
-use crate::{Bounds, IntoParAccess, LinearParAccess, ParAccess};
+use crate::par_access::ParAccess;
+use crate::{BoundedParAccess, Bounds, IntoParAccess, LinearParAccess};
 use std::marker::PhantomData;
 
 /// Parallel access to a mutable slice.
@@ -43,7 +44,9 @@ unsafe impl<'a, T: Sync + Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
     unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
         &mut *self.ptr.add(index)
     }
+}
 
+unsafe impl<'a, T: Sync + Send> BoundedParAccess<usize> for ParSliceAccessMut<'a, T> {
     #[inline(always)]
     fn in_bounds(&self, index: usize) -> bool {
         index < self.len
