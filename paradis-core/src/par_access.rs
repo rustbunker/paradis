@@ -1,15 +1,51 @@
 use crate::{Bounds, RecordIndex};
 
+/// Unsynchronized access to records in a collection.
+///
+/// The trait provides *unsynchronized* access to *records*, defined by the
+/// associated [`Record`](Self::Record) type, that are indexed by the `Index` parameter.
+/// This trait gives data structures a means to give users
+/// unfettered access to its records, without exposing internal implementation details
+/// to the user. In turn, it is the responsibility of the user to maintain the invariants
+/// of Rust's memory safety model.
+///
+/// An access object for a data structure is usually a lightweight wrapper around one
+/// or more pointers, plus necessary metadata.
+///
+/// # Safety
+///
+/// A user must ensure that a record — accessed by the same index — is only accessed once,
+/// at any given time. It may be helpful to imagine that [`Record`](Self::Record) is
+/// a mutable reference, `&mut T`, and so it is undefined behavior to obtain two mutable
+/// references to the same object. In other words, once a specific [`Record`](Self::Record)
+/// is accessed, it can not be accessed through this access object again until the previous
+/// instance is dropped.
+///
+/// Whether accessing records from a different thread is sound depends on whether the
+/// records implement [`Send`].
+///
+/// An implementor must ensure that, for as long as any access object exists, the size of the
+/// data structure remains unchanged, and that the same index always refers to the same "slot"
+/// in the data structure.
 pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
+    /// A record (element) in the underlying collection.
     type Record;
 
+    /// Clones this access.
+    ///
+    /// # Safety
+    ///
+    /// This is unsafe, because methods that consume access objects typically assume that
+    /// the access is exclusive. If the access is cloned, then the user must ensure that
+    /// the invariants are uphold across *all* active accesses. Typically, this is achieved
+    /// by having each access work on disjoint sets of records.
     unsafe fn clone_access(&self) -> Self;
 
     /// Unsynchronized lookup of record without bounds checks.
     ///
     /// # Safety
     ///
-    /// See trait documentation. TODO: Elaborate
+    /// See trait documentation.
     unsafe fn get_unsync_unchecked(&self, index: Index) -> Self::Record;
 }
 
