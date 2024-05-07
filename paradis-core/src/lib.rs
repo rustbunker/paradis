@@ -6,6 +6,8 @@
 //! expose their data structures to `paradis` algorithms should depend on this crate
 //! instead `paradis`.
 
+#![warn(missing_docs)]
+
 mod par_access;
 mod record_index;
 

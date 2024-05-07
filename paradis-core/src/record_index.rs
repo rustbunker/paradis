@@ -18,13 +18,19 @@ use crate::internal::Sealed;
 pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {
     // fn bounds_overlap(bounds1: &Bounds<Self>, bounds2: &Bounds<Self>) -> bool;
 
+    /// Determine if a set of bounds contains another set of bounds.
     fn contains_bounds(container: &Bounds<Self>, bounds: &Bounds<Self>) -> bool;
+
+    /// Determine if this index is contained inside the provided bounds.
     fn in_bounds(&self, bounds: &Bounds<Self>) -> bool;
 
+    /// Expand these bounds to include the given index.
     fn enclose_index(bounds: &mut Bounds<Self>, index: Self);
 
+    /// Returns a set of bounds that are empty (zero extent).
     fn empty_bounds() -> Bounds<Self>;
 
+    /// Returns a set of bounds that exactly contain only the provided index.
     fn bounds_for_index(index: Self) -> Bounds<Self>;
 }
 
@@ -43,9 +49,12 @@ pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {
 /// *Offset* primarily exists in order for index lists to more tightly describe their bounds,
 /// which can be used, for example, to ensure that index lists with disjoint bounds contain
 /// disjoint indices.
+/// However, a data structure *can* have non-zero offset.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Bounds<I> {
+    /// The offset of the bounds.
     pub offset: I,
+    /// The extent of the bounds.
     pub extent: I,
 }
 
