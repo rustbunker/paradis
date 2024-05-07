@@ -81,11 +81,9 @@ impl<'data, T, const M: usize, const N: usize, const P: usize, const Q: usize>
     }
 }
 
-// TODO: What kind of requirements to I have to impose on T for this to be sound? Any?
 unsafe impl<'data, T> Send for FourDimArrayAccessMut<'data, T> {}
 unsafe impl<'data, T> Sync for FourDimArrayAccessMut<'data, T> {}
 
-// TODO: What kind of requirements need to be imposed on T for this to be sound?
 unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAccessMut<'data, T> {
     type Record = &'data mut T;
 

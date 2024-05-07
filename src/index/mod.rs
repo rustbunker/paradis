@@ -33,8 +33,6 @@ pub fn narrow_access_to_indices<IntoAccess, Indices>(
     indices: &Indices,
 ) -> Result<NarrowedAccess<'_, Indices, IntoAccess::Access>, OutOfBounds>
 where
-    // TODO: Is the Sized bound necessary? Do we want it? The alternative is to sprinkle
-    // ?Sized around, but I'm not sure whether we want that either. Gotta figure out...
     Indices: UniqueIndexList,
     Indices::Index: RecordIndex,
     IntoAccess: IntoParAccess<Indices::Index>,

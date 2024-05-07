@@ -5,11 +5,6 @@ use paradis_core::Bounds;
 ///
 /// See [IndexList::index_zip](crate::index::IndexList::index_zip) for more
 /// information.
-///
-/// TODO: Currently we require that A: UniqueIndexList and B: IndexList, but it should ideally
-/// also be possible to use it the other way around. One option could be to provide
-/// an associated const ALL_UNIQUE in IndexList, lower the constriant to A, B: IndexList
-/// and that check at "runtime" that A and/or B.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IndexZip<A, B>(A, B);
 
