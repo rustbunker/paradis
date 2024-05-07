@@ -12,6 +12,9 @@ use crate::{Bounds, RecordIndex};
 /// An access object for a data structure is usually a lightweight wrapper around one
 /// or more pointers, plus necessary metadata.
 ///
+/// In order to use higher-level functionality in `paradis`,
+/// implementors should try to implement [`BoundedParAccess`] too, whenever possible.
+///
 /// # Safety
 ///
 /// A user must ensure that a record — accessed by the same index — is only accessed once,
@@ -49,27 +52,16 @@ pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
     unsafe fn get_unsync_unchecked(&self, index: Index) -> Self::Record;
 }
 
-/// Facilitates unsynchronized access to records stored in the collection.
+/// Unsynchronized access to a bounded collection.
 ///
-/// The trait provides *unsynchronized* access to (possibly mutable) *records*, defined by the
-/// associated type [`Record`][`ParAccess::Record`].
+/// This trait allows a data structure that is structurally similar to a multidimensional array
+/// to describe its bounds, which enables use of the data structure with higher-level functionality
+/// in `paradis`.
 ///
 /// # Safety
 ///
-/// An implementor must ensure that it is sound for multiple threads to access a single record
-/// *immutably*, provided that no thread accesses the same record mutably.
-///
-/// An implementor must furthermore ensure that it is sound for multiple threads to access
-/// *disjoint* records mutably.
-///
-/// It is the responsibility of the consumer that:
-///
-/// - If any thread accesses a record mutably, then no other thread must access the same record.
-/// - A mutable record must always be exclusive, even on a single thread.
-///   In particular, a single thread is not permitted to obtain two records associated with the
-///   same index in the collection if either record is mutable.
-///
-/// TODO: Make the invariants more precise
+/// The bounds reported *must* be correct, in the sense that any index contained in the bounds
+/// may be used to access a valid record.
 pub unsafe trait BoundedParAccess<Index: Copy>: ParAccess<Index> {
     /// The bounds of this data structure.
     ///
@@ -80,7 +72,9 @@ pub unsafe trait BoundedParAccess<Index: Copy>: ParAccess<Index> {
 
     /// Determine if the provided index is in bounds.
     ///
-    /// TODO: Remove this method in favor of using self.bounds().contains_index(idx)
+    /// Can be overridden by implementors for a simpler implementation than the default,
+    /// which may aid the compiler in eliding bounds checks in situations where bounds may
+    /// not be eliminated upfront.
     fn in_bounds(&self, index: Index) -> bool
     where
         Index: RecordIndex,
@@ -90,14 +84,15 @@ pub unsafe trait BoundedParAccess<Index: Copy>: ParAccess<Index> {
 
     /// Unsynchronized mutable lookup of record.
     ///
+    /// The access is unsynchronized (and therefore unsafe), but bounds checked.
+    ///
     /// # Safety
     ///
-    /// See trait documentation. TODO: Elaborate
+    /// See trait documentation.
     ///
     /// # Panics
     ///
-    /// Implementors must ensure that the method panics if the index is out of bounds.
-    #[inline(always)]
+    /// Panics if index is out of bounds.
     unsafe fn get_unsync(&self, index: Index) -> Self::Record
     where
         Index: RecordIndex,
