@@ -69,7 +69,7 @@ impl<'a, T: Sync + Send> IntoParAccess<usize> for &'a mut [T] {
 }
 
 unsafe impl<'a, T: Sync + Send> LinearParAccess for ParSliceAccessMut<'a, T> {
-    fn len(&self) -> usize {
+    fn collection_len(&self) -> usize {
         self.len
     }
 }

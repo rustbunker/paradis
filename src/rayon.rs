@@ -85,7 +85,7 @@ where
     }
 
     fn opt_len(&self) -> Option<usize> {
-        Some(self.access.len())
+        Some(self.access.collection_len())
     }
 }
 
@@ -95,7 +95,7 @@ where
     Access::Record: Send,
 {
     fn len(&self) -> usize {
-        self.access.len()
+        self.access.collection_len()
     }
 
     fn drive<C: Consumer<Self::Item>>(self, consumer: C) -> C::Result {
@@ -107,7 +107,7 @@ where
 
         callback.callback(AccessProducer {
             start_idx: 0,
-            end_idx: access.len(),
+            end_idx: access.collection_len(),
             access,
         })
     }

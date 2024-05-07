@@ -120,8 +120,12 @@ impl<Index: Copy, Access: BoundedParAccess<Index>> IntoParAccess<Index> for Acce
 }
 
 /// An unsynchronized access to an array-like structure, indexed by `usize`.
+///
+/// # Safety
+///
+/// The length of the collection must be reported correctly.
 pub unsafe trait LinearParAccess: BoundedParAccess<usize> {
-    /// The number of accessible records.
+    /// The number of accessible records in the collection.
     ///
     /// An implementor must ensure that this length never changes. In other words,
     /// once an access is obtained, the size of the collection must never not change
@@ -129,7 +133,7 @@ pub unsafe trait LinearParAccess: BoundedParAccess<usize> {
     ///
     /// It must also be equivalent to the result returned by the extent of the
     /// [`Bounds`] of the access.
-    fn len(&self) -> usize {
+    fn collection_len(&self) -> usize {
         self.bounds().extent
     }
 }

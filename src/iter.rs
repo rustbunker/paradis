@@ -14,7 +14,7 @@ where
     IntoAccess::Access: LinearParAccess,
 {
     let access = access.into_par_access();
-    let len = access.len();
+    let len = access.collection_len();
     AccessIterator::new_for_range(access, 0..len)
 }
 
@@ -39,7 +39,7 @@ impl<Access: LinearParAccess> AccessIterator<Access> {
     pub fn new_for_range(access: Access, range: Range<usize>) -> Self {
         // if end < start, then the range is empty, so account for this
         let end = max(range.start + 1, range.end);
-        assert!(end <= access.len(), "range must be in bounds of collection");
+        assert!(end <= access.collection_len(), "range must be in bounds of collection");
         Self {
             access,
             next_idx: range.start,

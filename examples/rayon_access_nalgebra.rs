@@ -67,7 +67,7 @@ unsafe impl<'a, T: Scalar> BoundedParAccess<usize> for DMatrixColParAccessMut<'a
 }
 
 unsafe impl<'a, T: Scalar> LinearParAccess for DMatrixColParAccessMut<'a, T> {
-    fn len(&self) -> usize {
+    fn collection_len(&self) -> usize {
         self.cols
     }
 }

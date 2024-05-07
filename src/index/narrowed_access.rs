@@ -117,7 +117,7 @@ where
     Access: BoundedParAccess<Indices::Index>,
 {
     #[inline(always)]
-    fn len(&self) -> usize {
+    fn collection_len(&self) -> usize {
         self.indices.num_indices()
     }
 }
