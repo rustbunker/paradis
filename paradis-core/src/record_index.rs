@@ -2,8 +2,19 @@ use crate::internal::Sealed;
 
 /// A type suitable for use as an index into a collection of records.
 ///
-/// Any implementor of this trait must uphold the contract that if two indices compare unequal,
-/// then they do not index the same location. TODO: Write proper Safety section
+/// This trait is currently sealed in order to make changes more easily, and because
+/// there currently is no use case for implementing it outside this crate. If you have a
+/// use case for this, please file an issue.
+///
+/// # Safety
+///
+/// Consumers of this trait must be able to rely on the correctness of the provided methods
+/// in `unsafe` contexts.
+///
+/// All auxiliary traits required by this trait, such as `Eq`, `Ord` or `Hash`,
+/// *must* be implemented correctly.
+///
+/// If two indices compare unequal, then they must not access the same record in a collection.
 pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {
     // fn bounds_overlap(bounds1: &Bounds<Self>, bounds2: &Bounds<Self>) -> bool;
 
