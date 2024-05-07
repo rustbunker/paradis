@@ -7,8 +7,6 @@ use crate::RecordIndex;
 /// The intention behind this trait is to permit converting e.g. `u16` or `u32` type indices
 /// (or tuples thereof) to `usize`-based indices. This is primarily useful for saving space
 /// when the indices need to be explicitly stored.
-///
-/// TODO: Extend impls to higher-arity tuples
 pub trait IndexFrom<SourceIndex>: internal::Sealed {
     /// Convert the source index to `Self`, the target index type.
     fn index_from(source: SourceIndex) -> Self;
@@ -42,23 +40,28 @@ impl IndexFrom<u64> for usize {
     }
 }
 
-impl<I0> IndexFrom<(I0,)> for (usize,)
-where
-    I0: RecordIndex,
-    usize: IndexFrom<I0>,
-{
-    fn index_from((i0,): (I0,)) -> Self {
-        (usize::index_from(i0),)
+macro_rules! replace_with_usize {
+    ($content:tt) => {
+        usize
+    };
+}
+
+macro_rules! impl_tuple_index_from {
+    ($($i:tt),*) => {
+        impl<$($i),*> IndexFrom<($($i),*)> for ($(replace_with_usize!($i)),*)
+        where
+            $($i: RecordIndex),*,
+            usize: $(IndexFrom<$i> +)*,
+        {
+            #[allow(non_snake_case)]
+            fn index_from(($($i),*): ($($i), *)) -> Self {
+                ( $(usize::index_from($i)),* )
+            }
+        }
     }
 }
 
-impl<I0, I1> IndexFrom<(I0, I1)> for (usize, usize)
-where
-    I0: RecordIndex,
-    I1: RecordIndex,
-    usize: IndexFrom<I0> + IndexFrom<I1>,
-{
-    fn index_from((i0, i1): (I0, I1)) -> Self {
-        (usize::index_from(i0), usize::index_from(i1))
-    }
-}
+impl_tuple_index_from!(I0, I1);
+impl_tuple_index_from!(I0, I1, I2);
+impl_tuple_index_from!(I0, I1, I2, I3);
+impl_tuple_index_from!(I0, I1, I2, I3, I4);
