@@ -7,6 +7,25 @@ use crate::{Bounds, IndexFrom, RecordIndex};
 use std::hash::Hash;
 
 /// A finite list of indices.
+///
+/// The list is abstract. For example, [`Range<usize>`](std::ops::Range) is considered a list
+/// of indices.
+///
+/// In order to avoid confusing terminology, we use the term *location* to describe an index
+/// into a list of indices. That is, a list of indices can be accessed with an `usize` location.
+///
+/// # Safety
+///
+/// The number of indices reported *must* be correct to ensure soundness of unchecked access.
+///
+/// While no method that take `&mut self` has been called on this list,
+/// the indices contained in the list must not change.
+/// Just behave like a normal list, don't do any funky stuff.
+///
+/// Any bounds returned *must* be correct, in the sense that all indices in the list must
+/// be contained inside the reported bounds.
+///
+/// If `ALWAYS_BOUNDED` is `true`, then [`bounds`](Self::bounds) must never return `None`.
 pub unsafe trait IndexList: Sync + Send {
     /// The index type contained in this index list.
     type Index: Copy;
@@ -20,6 +39,10 @@ pub unsafe trait IndexList: Sync + Send {
     /// Obtain the index at the given location.
     ///
     /// No bounds checks are performed.
+    ///
+    /// # Safety
+    ///
+    /// The location must be in bounds with respect to [`num_indices`](Self::num_indices).
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index;
 
     /// The number of indices in this index list.
@@ -159,7 +182,9 @@ unsafe impl<'a, I: IndexList> IndexList for &'a I {
 
 /// A finite list of *unique* indices.
 ///
-/// TODO: Document requirements
+/// # Safety
+///
+/// All indices in the list *must* be unique.
 pub unsafe trait UniqueIndexList: IndexList {}
 
 unsafe impl<'a, I: UniqueIndexList> UniqueIndexList for &'a I {}
