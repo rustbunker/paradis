@@ -42,7 +42,7 @@ unsafe impl<'a, T: Sync + Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
 
     #[inline(always)]
     unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
-        &mut *self.ptr.add(index)
+        unsafe { &mut *self.ptr.add(index) }
     }
 }
 

@@ -44,10 +44,12 @@ where
     const ALWAYS_BOUNDED: bool = A::ALWAYS_BOUNDED && B::ALWAYS_BOUNDED;
 
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
-        (
-            self.0.get_index_unchecked(loc),
-            self.1.get_index_unchecked(loc),
-        )
+        unsafe {
+            (
+                self.0.get_index_unchecked(loc),
+                self.1.get_index_unchecked(loc),
+            )
+        }
     }
 
     fn num_indices(&self) -> usize {
@@ -110,10 +112,12 @@ where
     const ALWAYS_BOUNDED: bool = A::ALWAYS_BOUNDED && B::ALWAYS_BOUNDED;
 
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
-        (
-            self.0.get_index_unchecked(loc),
-            self.1.get_index_unchecked(loc),
-        )
+        unsafe {
+            (
+                self.0.get_index_unchecked(loc),
+                self.1.get_index_unchecked(loc),
+            )
+        }
     }
 
     fn num_indices(&self) -> usize {

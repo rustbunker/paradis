@@ -57,7 +57,7 @@ unsafe impl<I: Copy + Send + Sync> IndexList for Vec<I> {
     const ALWAYS_BOUNDED: bool = false;
 
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
-        *<[I]>::get_unchecked(self.as_slice(), loc)
+        unsafe { *<[I]>::get_unchecked(self.as_slice(), loc) }
     }
 
     fn num_indices(&self) -> usize {

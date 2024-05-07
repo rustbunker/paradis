@@ -74,7 +74,7 @@ where
     const ALWAYS_BOUNDED: bool = true;
 
     unsafe fn get_index_unchecked(&self, i: usize) -> Self::Index {
-        self.indices.get_index_unchecked(i)
+        unsafe { self.indices.get_index_unchecked(i) }
     }
 
     fn num_indices(&self) -> usize {

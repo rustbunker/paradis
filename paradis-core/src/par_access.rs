@@ -98,7 +98,7 @@ pub unsafe trait BoundedParAccess<Index: Copy>: ParAccess<Index> {
         Index: RecordIndex,
     {
         assert!(self.in_bounds(index), "index out of bounds");
-        self.get_unsync_unchecked(index)
+        unsafe { self.get_unsync_unchecked(index) }
     }
 }
 

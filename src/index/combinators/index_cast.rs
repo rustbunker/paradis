@@ -22,7 +22,7 @@ where
 
     unsafe fn get_index_unchecked(&self, i: usize) -> Self::Index {
         // TODO: Cannot use TryFrom since it's not guaranteed to be
-        let source_idx = self.source_indices.get_index_unchecked(i);
+        let source_idx = unsafe { self.source_indices.get_index_unchecked(i) };
         TargetIndex::index_from(source_idx)
     }
 

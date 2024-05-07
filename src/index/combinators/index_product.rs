@@ -22,7 +22,7 @@ where
         let m = self.1.num_indices();
         let i = loc / m;
         let j = loc % m;
-        (self.0.get_index_unchecked(i), self.1.get_index_unchecked(j))
+        unsafe { (self.0.get_index_unchecked(i), self.1.get_index_unchecked(j)) }
     }
 
     fn num_indices(&self) -> usize {

@@ -17,7 +17,7 @@ where
     const ALWAYS_BOUNDED: bool = SourceIndices::ALWAYS_BOUNDED;
 
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
-        self.0.get_index_unchecked(loc).flatten()
+        unsafe { self.0.get_index_unchecked(loc) }.flatten()
     }
 
     fn num_indices(&self) -> usize {

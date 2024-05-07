@@ -76,22 +76,22 @@ where
     unsafe fn get_unsync_unchecked(&self, loc: usize) -> Self::Record {
         // SAFETY: Since this is an unchecked method, we can always directly try to obtain
         // the index at the requested location in the index list
-        let index = self.indices.get_index_unchecked(loc);
+        let index = unsafe { self.indices.get_index_unchecked(loc) };
         if Indices::ALWAYS_BOUNDED {
             // This branch hopefully allows us to completely eliminate all branches
             // whenever we're able to statically prove that bounds checking is unnecessary
             debug_assert!(self.verified_in_bounds);
             // SAFETY: This is sound due to the fact that
             // we've checked that all indices are in bounds when constructing Self
-            self.access.get_unsync_unchecked(index)
+            unsafe { self.access.get_unsync_unchecked(index) }
         } else if self.verified_in_bounds {
             // SAFETY: This is sound due to the fact that
             // we've checked that all indices are in bounds when constructing Self
-            self.access.get_unsync_unchecked(index)
+            unsafe { self.access.get_unsync_unchecked(index) }
         } else {
             // We cannot prove that all indices are in bounds, so we need
             // to use bounds checking to avoid possible unsoundness
-            self.access.get_unsync(index)
+            unsafe { self.access.get_unsync(index) }
         }
     }
 }

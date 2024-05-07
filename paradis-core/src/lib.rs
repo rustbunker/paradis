@@ -7,6 +7,7 @@
 //! instead `paradis`.
 
 #![warn(missing_docs)]
+#![deny(unsafe_op_in_unsafe_fn)]
 
 mod par_access;
 mod record_index;

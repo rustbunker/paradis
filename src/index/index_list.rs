@@ -168,7 +168,7 @@ unsafe impl<'a, I: IndexList> IndexList for &'a I {
     const ALWAYS_BOUNDED: bool = I::ALWAYS_BOUNDED;
 
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
-        I::get_index_unchecked(self, loc)
+        unsafe { I::get_index_unchecked(self, loc) }
     }
 
     fn num_indices(&self) -> usize {
