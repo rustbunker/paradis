@@ -18,10 +18,7 @@ impl IndexFrom<usize> for usize {
     }
 }
 
-#[cfg(any(
-    target_pointer_width = "32",
-    target_pointer_width = "64",
-))]
+#[cfg(any(target_pointer_width = "32", target_pointer_width = "64",))]
 impl IndexFrom<u32> for usize {
     fn index_from(source: u32) -> Self {
         source

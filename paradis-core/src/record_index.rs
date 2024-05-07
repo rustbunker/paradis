@@ -142,10 +142,7 @@ macro_rules! impl_single_dim_index {
 
 impl_single_dim_index!(usize);
 
-#[cfg(any(
-    target_pointer_width = "32",
-    target_pointer_width = "64",
-))]
+#[cfg(any(target_pointer_width = "32", target_pointer_width = "64",))]
 impl_single_dim_index!(u32);
 
 #[cfg(any(target_pointer_width = "64"))]
