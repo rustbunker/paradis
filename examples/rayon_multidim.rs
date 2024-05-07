@@ -13,7 +13,7 @@ fn main() {
 
     {
         // Iterate over all elements
-        let mut array = array.clone();
+        let mut array = array;
         let access = FourDimArrayAccessMut::from(&mut array);
 
         let indices = (0..2)
@@ -36,7 +36,7 @@ fn main() {
 
     {
         // Iterate only over select elements
-        let mut array = array.clone();
+        let mut array = array;
         let access = FourDimArrayAccessMut::from(&mut array);
 
         // We can think of our 2x2x2x2 array as a matrix of matrices
@@ -62,17 +62,6 @@ fn main() {
         );
     }
 }
-
-// /// A four-dimensional 4x4x4x4 array (just a wrapper around a nested array)
-// struct FourDimArray<T> {
-//     array: [[[[T; 4]; 4]; 4]; 4]
-// }
-//
-// impl<T> From<[[[[T; 4]; 4]; 4]; 4]> for FourDimArray<T> {
-//     fn from(array: [[[[T; 4]; 4]; 4]; 4]) -> Self {
-//         Self { array }
-//     }
-// }
 
 struct FourDimArrayAccessMut<'data, T> {
     ptr: *mut T,
@@ -104,7 +93,7 @@ unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAc
         Self {
             ptr: self.ptr,
             dims: self.dims,
-            marker: self.marker.clone(),
+            marker: self.marker,
         }
     }
 

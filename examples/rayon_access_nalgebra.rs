@@ -102,7 +102,7 @@ unsafe impl<'a, T: Scalar> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a,
             ptr: self.ptr,
             rows: self.rows,
             cols: self.cols,
-            marker: self.marker.clone(),
+            marker: self.marker,
         }
     }
 

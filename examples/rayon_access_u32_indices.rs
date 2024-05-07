@@ -9,7 +9,7 @@ fn main() {
 
 fn example_with_checked_indices_u32() {
     let mut data = vec![1.0; 10000];
-    let ref index_data: Vec<u32> = vec![900, 5, 10, 400, 1000, 100, 200];
+    let index_data: &Vec<u32> = &vec![900, 5, 10, 400, 1000, 100, 200];
     let indices = index_data
         .check_unique()
         .expect("All indices unique")

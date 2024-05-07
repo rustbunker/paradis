@@ -3,6 +3,7 @@
 use std::thread::scope;
 
 /// Multiply even numbers by 2, odd numbers by 4 by using separate threads for even and odd numbers.
+#[allow(clippy::redundant_locals)]
 fn par_even_odd(numbers: &mut [i32]) {
     let n = numbers.len();
 
