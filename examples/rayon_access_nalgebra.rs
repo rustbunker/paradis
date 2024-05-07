@@ -211,10 +211,6 @@ fn example_par_column_iteration() {
     let mut matrix = DMatrix::repeat(m, n, 2.0);
     let col_access = DMatrixColParAccessMut::from_matrix_mut(&mut matrix);
 
-    // TODO: Combine with disjoint index access to show that we can use this to access a subset
-    // of indices
-    // let indices = 0..n;
-
     create_par_iter(col_access).for_each(|mut col| {
         assert_eq!(col.nrows(), m);
         assert_eq!(col.ncols(), 1);
