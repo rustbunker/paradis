@@ -25,10 +25,10 @@ impl<'a, T> ParSliceAccessMut<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Sync> Sync for ParSliceAccessMut<'a, T> {}
+unsafe impl<'a, T: Send> Sync for ParSliceAccessMut<'a, T> {}
 unsafe impl<'a, T: Send> Send for ParSliceAccessMut<'a, T> {}
 
-unsafe impl<'a, T: Sync + Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
+unsafe impl<'a, T: Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
     type Record = &'a mut T;
 
     #[inline(always)]
@@ -46,7 +46,7 @@ unsafe impl<'a, T: Sync + Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Sync + Send> BoundedParAccess<usize> for ParSliceAccessMut<'a, T> {
+unsafe impl<'a, T: Send> BoundedParAccess<usize> for ParSliceAccessMut<'a, T> {
     #[inline(always)]
     fn in_bounds(&self, index: usize) -> bool {
         index < self.len
@@ -60,7 +60,7 @@ unsafe impl<'a, T: Sync + Send> BoundedParAccess<usize> for ParSliceAccessMut<'a
     }
 }
 
-impl<'a, T: Sync + Send> IntoParAccess<usize> for &'a mut [T] {
+impl<'a, T: Send> IntoParAccess<usize> for &'a mut [T] {
     type Access = ParSliceAccessMut<'a, T>;
 
     fn into_par_access(self) -> Self::Access {
@@ -68,7 +68,7 @@ impl<'a, T: Sync + Send> IntoParAccess<usize> for &'a mut [T] {
     }
 }
 
-unsafe impl<'a, T: Sync + Send> LinearParAccess for ParSliceAccessMut<'a, T> {
+unsafe impl<'a, T: Send> LinearParAccess for ParSliceAccessMut<'a, T> {
     fn collection_len(&self) -> usize {
         self.len
     }

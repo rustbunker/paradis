@@ -84,7 +84,9 @@ impl<'data, T, const M: usize, const N: usize, const P: usize, const Q: usize>
 unsafe impl<'data, T> Send for FourDimArrayAccessMut<'data, T> {}
 unsafe impl<'data, T> Sync for FourDimArrayAccessMut<'data, T> {}
 
-unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAccessMut<'data, T> {
+unsafe impl<'data, T: Send> ParAccess<(usize, usize, usize, usize)>
+    for FourDimArrayAccessMut<'data, T>
+{
     type Record = &'data mut T;
 
     unsafe fn clone_access(&self) -> Self {
@@ -105,7 +107,7 @@ unsafe impl<'data, T> ParAccess<(usize, usize, usize, usize)> for FourDimArrayAc
     }
 }
 
-unsafe impl<'data, T> BoundedParAccess<(usize, usize, usize, usize)>
+unsafe impl<'data, T: Send> BoundedParAccess<(usize, usize, usize, usize)>
     for FourDimArrayAccessMut<'data, T>
 {
     fn bounds(&self) -> Bounds<(usize, usize, usize, usize)> {

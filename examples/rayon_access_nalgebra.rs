@@ -28,7 +28,7 @@ impl<'a, T> DMatrixColParAccessMut<'a, T> {
 unsafe impl<'a, T> Send for DMatrixColParAccessMut<'a, T> {}
 unsafe impl<'a, T> Sync for DMatrixColParAccessMut<'a, T> {}
 
-unsafe impl<'a, T: Scalar> ParAccess<usize> for DMatrixColParAccessMut<'a, T> {
+unsafe impl<'a, T: Scalar + Send> ParAccess<usize> for DMatrixColParAccessMut<'a, T> {
     type Record = DVectorViewMut<'a, T>;
 
     #[inline(always)]
@@ -52,7 +52,7 @@ unsafe impl<'a, T: Scalar> ParAccess<usize> for DMatrixColParAccessMut<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Scalar> BoundedParAccess<usize> for DMatrixColParAccessMut<'a, T> {
+unsafe impl<'a, T: Scalar + Send> BoundedParAccess<usize> for DMatrixColParAccessMut<'a, T> {
     #[inline(always)]
     fn in_bounds(&self, index: usize) -> bool {
         index < self.cols
@@ -66,7 +66,7 @@ unsafe impl<'a, T: Scalar> BoundedParAccess<usize> for DMatrixColParAccessMut<'a
     }
 }
 
-unsafe impl<'a, T: Scalar> LinearParAccess for DMatrixColParAccessMut<'a, T> {
+unsafe impl<'a, T: Scalar + Send> LinearParAccess for DMatrixColParAccessMut<'a, T> {
     fn collection_len(&self) -> usize {
         self.cols
     }
@@ -94,7 +94,7 @@ impl<'a, T> DMatrixParAccessMut<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Scalar> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a, T> {
+unsafe impl<'a, T: Scalar + Send> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a, T> {
     type Record = &'a mut T;
 
     unsafe fn clone_access(&self) -> Self {
@@ -113,7 +113,7 @@ unsafe impl<'a, T: Scalar> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a,
     }
 }
 
-unsafe impl<'a, T: Scalar> BoundedParAccess<(usize, usize)> for DMatrixParAccessMut<'a, T> {
+unsafe impl<'a, T: Scalar + Send> BoundedParAccess<(usize, usize)> for DMatrixParAccessMut<'a, T> {
     fn bounds(&self) -> Bounds<(usize, usize)> {
         Bounds {
             offset: (0, 0),

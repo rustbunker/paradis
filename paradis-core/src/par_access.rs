@@ -24,15 +24,23 @@ use crate::{Bounds, RecordIndex};
 /// is accessed, it can not be accessed through this access object again until the previous
 /// instance is dropped.
 ///
-/// Whether accessing records from a different thread is sound depends on whether the
-/// records implement [`Send`].
-///
 /// An implementor must ensure that, for as long as any access object exists, the size of the
 /// data structure remains unchanged, and that the same index always refers to the same "slot"
 /// in the data structure.
+///
+/// # Notes on design
+///
+/// In an early iteration of `paradis`, [`Record`](Self::Record) was not required to implement
+/// `Send`. The idea was that you should be able to use the abstraction also in single-threaded
+/// scenarios, possibly with types that are not `Send`. However, since we want `ParAccess` to
+/// be `Send` and `Sync`, this could lead to unsoundness because moving an access object
+/// into a thread would allow us to create, say, a single-threaded iterator to records in
+/// that thread, even though those records were not constrained to be `Send`.
+/// To eliminate problems like these, we therefore require that [`Record`](Self::Record)
+/// implements `Send`.
 pub unsafe trait ParAccess<Index: Copy>: Sync + Send {
     /// A record (element) in the underlying collection.
-    type Record;
+    type Record: Send;
 
     /// Clones this access.
     ///
