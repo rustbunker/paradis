@@ -5,6 +5,8 @@
 //! no further breaking changes are necessary. Therefore, library authors who only want to
 //! expose their data structures to `paradis` algorithms should depend on this crate
 //! instead `paradis`.
+//!
+//! Please see documentation for `paradis` for more information about the library.
 
 #![warn(missing_docs)]
 #![deny(unsafe_op_in_unsafe_fn)]
