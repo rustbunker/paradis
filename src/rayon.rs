@@ -1,5 +1,9 @@
 //! Interoperability with `rayon` parallel iterators.
 //!
+#![cfg_attr(
+    not(docsrs),
+    doc = "**Only available when feature `rayon` is enabled.**\n"
+)]
 use crate::iter::AccessIterator;
 use crate::IntoParAccess;
 use paradis_core::LinearParAccess;

@@ -242,17 +242,15 @@
 //!
 //! The vision for `paradis` is for the set of structured index lists that can be expressed
 //! with safe combinators to expand over time, in order to cover more use cases.
-//!
-//! # TODOs
-//!
-//! TODO: Indicate necessary features for feature-gated functionality, such as rayon
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(missing_docs)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod error;
 pub mod index;
 pub mod iter;
+#[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
 #[cfg(feature = "rayon")]
 pub mod rayon;
 

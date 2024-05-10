@@ -43,6 +43,10 @@ harness = false
 [package.metadata.docs.rs]
 features = [ "rayon" ]
 
+# We use this attribute to enable the doc(cfg) feature, which documents
+# required features for feature-gated functionality
+rustdoc-args = ["--cfg", "docsrs"]
+
 [profile.bench]
 lto = "thin"
 codegen-units = 1
