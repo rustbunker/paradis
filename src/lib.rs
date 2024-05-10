@@ -13,6 +13,19 @@
 //! 2. Higher-level abstractions built on top of the unsafe base layer that allow many
 //!    parallel access patterns to be expressed in safe code, or with a minimum of unsafe code.
 //!
+//! The low-level abstractions are provided by the very lightweight `paradis-core` crate.
+//! Library authors are encouraged to depend only on this crate in order to expose their
+//! data structures for parallel access.
+//!
+//! To use `paradis`, add the following to your `Cargo.toml`:
+//! ```toml
+//! [dependencies]
+#![doc = concat!("paradis = ", env!("CARGO_PKG_VERSION"))]
+//!
+//! # if you need to use rayon iterators
+#![doc = concat!("paradis = { version = ", env!("CARGO_PKG_VERSION"), ", features = ['rayon'] }")]
+//! ```
+//!
 //! # Low-level unsynchronized access
 //!
 //! Consider a toy problem in which we want to access every even and odd entry in a slice
