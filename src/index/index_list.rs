@@ -156,7 +156,7 @@ pub unsafe trait IndexList: Sync + Send {
     fn check_unique(self) -> Result<CheckedUnique<Self>, NonUniqueIndex>
     where
         Self: Sized,
-        Self::Index: RecordIndex + Hash,
+        Self::Index: RecordIndex,
     {
         CheckedUnique::from_hashable_indices(self)
     }

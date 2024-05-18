@@ -1,4 +1,5 @@
 use crate::internal::Sealed;
+use std::hash::Hash;
 
 /// A type suitable for use as an index into a collection of records.
 ///
@@ -15,7 +16,7 @@ use crate::internal::Sealed;
 /// *must* be implemented correctly.
 ///
 /// If two indices compare unequal, then they must not access the same record in a collection.
-pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync {
+pub unsafe trait RecordIndex: Sealed + Eq + Copy + Send + Sync + Ord + Hash {
     // fn bounds_overlap(bounds1: &Bounds<Self>, bounds2: &Bounds<Self>) -> bool;
 
     /// Determine if a set of bounds contains another set of bounds.

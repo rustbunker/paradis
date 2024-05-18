@@ -37,10 +37,7 @@ where
     /// # Errors
     ///
     /// An error is returned if the indices are not unique.
-    pub fn from_hashable_indices(indices: Indices) -> Result<Self, NonUniqueIndex>
-    where
-        Indices::Index: Hash,
-    {
+    pub fn from_hashable_indices(indices: Indices) -> Result<Self, NonUniqueIndex> {
         let n = indices.num_indices();
         if n == 0 {
             return Ok(Self {
