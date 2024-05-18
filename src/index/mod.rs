@@ -1,15 +1,17 @@
 //! Construction of index lists, and facilities for access narrowing.
+use crate::error::OutOfBounds;
 use paradis_core::{IntoParAccess, RecordIndex};
 
 pub mod combinators;
 
+mod assumed_unique;
 mod checked_unique;
 mod index_list;
 mod index_list_impl_std;
 mod narrowed_access;
 mod repeat;
 
-use crate::error::OutOfBounds;
+pub use assumed_unique::AssumedUnique;
 pub use checked_unique::CheckedUnique;
 pub use index_list::{IndexList, UniqueIndexList};
 pub use narrowed_access::NarrowedAccess;

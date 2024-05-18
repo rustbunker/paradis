@@ -2,7 +2,7 @@ use crate::error::NonUniqueIndex;
 use crate::index::combinators::{
     IndexAZip, IndexCast, IndexFlatten, IndexProduct, IndexTranspose, IndexZip,
 };
-use crate::index::CheckedUnique;
+use crate::index::{AssumedUnique, CheckedUnique};
 use crate::{Bounds, IndexFrom, RecordIndex};
 use std::hash::Hash;
 
@@ -159,6 +159,21 @@ pub unsafe trait IndexList: Sync + Send {
         Self::Index: RecordIndex + Hash,
     {
         CheckedUnique::from_hashable_indices(self)
+    }
+
+    /// Turns an index list into a list of unique indices, without checking.
+    ///
+    /// This method is `unsafe`, because calling this method on a list of indices that
+    /// does not contain unique indices may lead to undefined behavior.
+    ///
+    /// # Safety
+    ///
+    /// The indices **must** be unique.
+    unsafe fn assume_unique(self) -> AssumedUnique<Self>
+    where
+        Self: Sized,
+    {
+        AssumedUnique::assume_unique(self)
     }
 }
 
