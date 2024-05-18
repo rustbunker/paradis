@@ -5,13 +5,13 @@ use std::marker::PhantomData;
 
 /// Parallel access to a mutable slice.
 #[derive(Debug)]
-pub struct ParSliceAccessMut<'a, T> {
+pub struct SliceParAccessMut<'a, T> {
     ptr: *mut T,
     len: usize,
     marker: PhantomData<&'a mut T>,
 }
 
-impl<'a, T> ParSliceAccessMut<'a, T> {
+impl<'a, T> SliceParAccessMut<'a, T> {
     /// Obtain parallel access to a mutable slice.
     ///
     /// In most cases, prefer to go through the implementation of [`IntoParAccess`] instead of this
@@ -25,10 +25,10 @@ impl<'a, T> ParSliceAccessMut<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Send> Sync for ParSliceAccessMut<'a, T> {}
-unsafe impl<'a, T: Send> Send for ParSliceAccessMut<'a, T> {}
+unsafe impl<'a, T: Send> Sync for SliceParAccessMut<'a, T> {}
+unsafe impl<'a, T: Send> Send for SliceParAccessMut<'a, T> {}
 
-unsafe impl<'a, T: Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
+unsafe impl<'a, T: Send> ParAccess<usize> for SliceParAccessMut<'a, T> {
     type Record = &'a mut T;
 
     #[inline(always)]
@@ -46,7 +46,7 @@ unsafe impl<'a, T: Send> ParAccess<usize> for ParSliceAccessMut<'a, T> {
     }
 }
 
-unsafe impl<'a, T: Send> BoundedParAccess<usize> for ParSliceAccessMut<'a, T> {
+unsafe impl<'a, T: Send> BoundedParAccess<usize> for SliceParAccessMut<'a, T> {
     #[inline(always)]
     fn in_bounds(&self, index: usize) -> bool {
         index < self.len
@@ -61,14 +61,14 @@ unsafe impl<'a, T: Send> BoundedParAccess<usize> for ParSliceAccessMut<'a, T> {
 }
 
 impl<'a, T: Send> IntoParAccess<usize> for &'a mut [T] {
-    type Access = ParSliceAccessMut<'a, T>;
+    type Access = SliceParAccessMut<'a, T>;
 
     fn into_par_access(self) -> Self::Access {
-        ParSliceAccessMut::from_slice_mut(self)
+        SliceParAccessMut::from_slice_mut(self)
     }
 }
 
-unsafe impl<'a, T: Send> LinearParAccess for ParSliceAccessMut<'a, T> {
+unsafe impl<'a, T: Send> LinearParAccess for SliceParAccessMut<'a, T> {
     fn collection_len(&self) -> usize {
         self.len
     }
