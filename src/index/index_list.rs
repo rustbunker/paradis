@@ -4,7 +4,6 @@ use crate::index::combinators::{
 };
 use crate::index::{AssumedUnique, CheckedUnique};
 use crate::{Bounds, IndexFrom, RecordIndex};
-use std::hash::Hash;
 
 /// A finite list of indices.
 ///
