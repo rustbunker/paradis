@@ -16,11 +16,11 @@ impl<Indices: IndexList> AssumedUnique<Indices> {
 }
 
 unsafe impl<Indices: IndexList> IndexList for AssumedUnique<Indices> {
-    type Index = ();
+    type Index = Indices::Index;
     const ALWAYS_BOUNDED: bool = false;
 
     unsafe fn get_index_unchecked(&self, loc: usize) -> Self::Index {
-        self.indices.get_index_unchecked(loc)
+        unsafe { self.indices.get_index_unchecked(loc) }
     }
 
     fn num_indices(&self) -> usize {

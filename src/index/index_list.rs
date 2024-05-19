@@ -173,7 +173,7 @@ pub unsafe trait IndexList: Sync + Send {
     where
         Self: Sized,
     {
-        AssumedUnique::assume_unique(self)
+        unsafe { AssumedUnique::assume_unique(self) }
     }
 }
 
