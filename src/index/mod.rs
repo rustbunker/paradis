@@ -41,3 +41,25 @@ where
 {
     NarrowedAccess::try_new(indices, access.into_par_access())
 }
+
+/// Collects an index list into the desired collection.
+///
+/// This is a convenience feature intended mainly for debugging and tests.
+///
+/// # Examples
+///
+/// ```
+/// use paradis::index::collect_indices;
+///
+/// let indices: Vec<_> = collect_indices(1 .. 5);
+/// assert_eq!(indices, vec![1, 2, 3, 4]);
+/// ```
+pub fn collect_indices<Collection, Indices>(indices: Indices) -> Collection
+where
+    Collection: FromIterator<Indices::Index>,
+    Indices: IndexList,
+{
+    (0..indices.num_indices())
+        .map(|loc| indices.get_index(loc))
+        .collect()
+}
