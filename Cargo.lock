@@ -228,7 +228,7 @@ dependencies = [
 
 [[package]]
 name = "paradis"
-version = "0.0.3"
+version = "0.1.0"
 dependencies = [
  "divan",
  "nalgebra",
@@ -239,11 +239,11 @@ dependencies = [
 
 [[package]]
 name = "paradis-core"
-version = "0.0.3"
+version = "0.1.0"
 
 [[package]]
 name = "paradis-demo"
-version = "0.0.3"
+version = "0.1.0"
 dependencies = [
  "nalgebra",
  "paradis-core",
