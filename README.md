@@ -60,15 +60,15 @@ use paradis::index::{IndexList, narrow_access_to_indices};
 use paradis::rayon::create_par_iter;
 use rayon::iter::ParallelIterator;
 
+// Access implementation omitted
+use paradis_demo::DMatrixParAccessMut;
+
 let mut matrix = dmatrix![1, 1, 1, 1, 1;
                           1, 1, 1, 1, 1;
                           1, 1, 1, 1, 1];
 
 // Superdiagonal indices are [(0, 1), (1, 2), (2, 3)]
 let superdiagonal_indices = (0 .. 3).index_zip(1 .. 4);
-
-// We omit the implementation of the access object, which hopefully may be
-// provided by nalgebra itself in the future
 let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
 let superdiagonal_access = narrow_access_to_indices(access, &superdiagonal_indices)
     .expect("Indices are in bounds");

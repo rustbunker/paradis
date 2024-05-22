@@ -130,66 +130,13 @@
 //! [nalgebra](https://nalgebra.org) matrix:
 //!
 //! ```rust
-//! # use std::marker::PhantomData;
-//! # use nalgebra::{Scalar, DMatrix};
-//! # use paradis_core::{BoundedParAccess, Bounds, ParAccess};
-//! #
-//! # pub struct DMatrixParAccessMut<'a, T> {
-//! #     ptr: *mut T,
-//! #     rows: usize,
-//! #     cols: usize,
-//! #     marker: PhantomData<&'a T>,
-//! # }
-//! #
-//! # unsafe impl<'a, T> Send for DMatrixParAccessMut<'a, T> {}
-//! # unsafe impl<'a, T> Sync for DMatrixParAccessMut<'a, T> {}
-//! #
-//! # impl<'a, T> DMatrixParAccessMut<'a, T> {
-//! #     pub fn from_matrix_mut(matrix: &'a mut DMatrix<T>) -> Self {
-//! #         Self {
-//! #             rows: matrix.nrows(),
-//! #             cols: matrix.ncols(),
-//! #             marker: Default::default(),
-//! #             ptr: matrix.as_mut_ptr(),
-//! #         }
-//! #     }
-//! # }
-//! #
-//! # unsafe impl<'a, T: Scalar + Send> ParAccess<(usize, usize)> for DMatrixParAccessMut<'a, T> {
-//! #     type Record = &'a mut T;
-//! #
-//! #     unsafe fn clone_access(&self) -> Self {
-//! #         Self {
-//! #             ptr: self.ptr,
-//! #             rows: self.rows,
-//! #             cols: self.cols,
-//! #             marker: self.marker,
-//! #         }
-//! #     }
-//! #
-//! #     unsafe fn get_unsync_unchecked(&self, (i, j): (usize, usize)) -> Self::Record {
-//! #         // Storage is col major
-//! #         let linear_idx = j * self.rows + i;
-//! #         &mut *self.ptr.add(linear_idx)
-//! #     }
-//! # }
-//! #
-//! # unsafe impl<'a, T: Scalar + Send> BoundedParAccess<(usize, usize)> for DMatrixParAccessMut<'a, T> {
-//! #     fn bounds(&self) -> Bounds<(usize, usize)> {
-//! #         Bounds {
-//! #             offset: (0, 0),
-//! #             extent: (self.rows, self.cols),
-//! #         }
-//! #     }
-//! #
-//! #     fn in_bounds(&self, (i, j): (usize, usize)) -> bool {
-//! #         i < self.rows && j < self.cols
-//! #     }
-//! # }
 //! use nalgebra::dmatrix;
 //! use paradis::index::{IndexList, narrow_access_to_indices};
 //! use paradis::rayon::create_par_iter;
 //! use rayon::iter::ParallelIterator;
+//!
+//! // Access implementation omitted
+//! use paradis_demo::DMatrixParAccessMut;
 //!
 //! let mut matrix = dmatrix![1, 1, 1, 1, 1;
 //!                           1, 1, 1, 1, 1;
@@ -197,9 +144,6 @@
 //!
 //! // Superdiagonal indices are [(0, 1), (1, 2), (2, 3)]
 //! let superdiagonal_indices = (0 .. 3).index_zip(1 .. 4);
-//!
-//! // We omit the implementation of the access object, which hopefully may be
-//! // provided by nalgebra itself in the future
 //! let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
 //! let superdiagonal_access = narrow_access_to_indices(access, &superdiagonal_indices)
 //!     .expect("Indices are in bounds");

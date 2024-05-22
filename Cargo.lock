@@ -233,12 +233,21 @@ dependencies = [
  "divan",
  "nalgebra",
  "paradis-core",
+ "paradis-demo",
  "rayon",
 ]
 
 [[package]]
 name = "paradis-core"
 version = "0.0.3"
+
+[[package]]
+name = "paradis-demo"
+version = "0.1.0"
+dependencies = [
+ "nalgebra",
+ "paradis-core",
+]
 
 [[package]]
 name = "paste"

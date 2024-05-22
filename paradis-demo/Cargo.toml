@@ -1,0 +1,8 @@
+[package]
+name = "paradis-demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nalgebra = "0.32.5"
+paradis-core = { version = "0.0.3", path = "../paradis-core" }
