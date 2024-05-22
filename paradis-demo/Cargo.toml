@@ -1,7 +1,15 @@
 [package]
 name = "paradis-demo"
-version = "0.1.0"
+version = "0.0.3"
 edition = "2021"
+description = "demo functionality for paradis, not intended for use"
+authors = [ "Andreas Longva "]
+license = "MIT OR Apache-2.0"
+readme = "../README.md"
+repository = "https://github.com/Andlon/paradis"
+documentation = "https://docs.rs/paradis-demo"
+keywords = [ "parallel", "thread", "disjoint", "index", "indices" ]
+categories = [ "concurrency", "rust-patterns" ]
 
 [dependencies]
 nalgebra = "0.32.5"

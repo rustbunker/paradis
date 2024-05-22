@@ -2,9 +2,13 @@
 name = "paradis-core"
 version = "0.0.3"
 edition = "2021"
-license = "MIT"
+description = "core functionality for paradis"
+authors = [ "Andreas Longva "]
+license = "MIT OR Apache-2.0"
 readme = "../README.md"
 repository = "https://github.com/Andlon/paradis"
-description = "Experimental parallel processing of disjoint indices"
+documentation = "https://docs.rs/paradis-core"
+keywords = [ "parallel", "thread", "disjoint", "index", "indices" ]
+categories = [ "concurrency", "rust-patterns" ]
 
 [dependencies]
