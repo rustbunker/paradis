@@ -1,4 +1,4 @@
-//! Parallel processing of disjoint indices.
+//! Parallel processing with disjoint indices.
 //!
 //! **`paradis` is currently at an early, experimental stage.
 //!   Test coverage is deliberately poor in order to make it easier to iterate on the
@@ -278,3 +278,8 @@ mod internal {
     impl<I0, I1, I2, I3, I4, I5> Sealed for (I0, I1, I2, I3, I4, I5) {}
     impl<I0, I1, I2, I3, I4, I5, I6> Sealed for (I0, I1, I2, I3, I4, I5, I6) {}
 }
+
+// This tests code examples in README.md
+#[doc = include_str!("../README.md")]
+#[cfg(doctest)]
+pub struct ReadmeDoctests;
