@@ -26,7 +26,7 @@ about how to use `paradis`.
 ## Examples
 
 The examples given here are provided just to give you a taste of
-the API. Please refer to the documentation for more context.
+the API. Please check out the documentation for more context.
 
 #### Safe parallel iteration with index lists
 
