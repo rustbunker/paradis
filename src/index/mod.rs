@@ -3,19 +3,18 @@ use crate::error::OutOfBounds;
 use paradis_core::{IntoParAccess, RecordIndex};
 
 pub mod combinators;
+pub mod patterns;
 
 mod assumed_unique;
 mod checked_unique;
 mod index_list;
 mod index_list_impl_std;
 mod narrowed_access;
-mod repeat;
 
 pub use assumed_unique::AssumedUnique;
 pub use checked_unique::CheckedUnique;
 pub use index_list::{IndexList, UniqueIndexList};
 pub use narrowed_access::NarrowedAccess;
-pub use repeat::Repeat;
 
 /// Narrows an access object to a subset of its index set.
 ///
