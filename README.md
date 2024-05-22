@@ -116,7 +116,7 @@ scope(|s| {
 
 `paradis` is open source, and contribution is welcome. There are several ways you can contribute:
 
-1. by trying `paradis` out for your application and report 
+1. by trying `paradis` out for your application and reporting on
    your experience in the [forum](https://github.com/Andlon/paradis/discussions).
 2. by filing [issues](https://github.com/Andlon/paradis/issues), like bugs, ideas for improvement or concerns about the design.
 3. by fixing bugs, improving documentation, or contributing new features as part of a pull request.
@@ -125,7 +125,7 @@ scope(|s| {
    to see if the feature is likely to be accepted.
 
 Keep in mind that `paradis` is not developed professionally.
-Although I, @Andlon, have every intention of following up on issues and PRs, life has a tendency
+Although I, [@Andlon](https://github.com/Andlon), have every intention of following up on issues and PRs, life has a tendency
 to get in the way at times, sometimes for extended periods of time.
 
 ## License
