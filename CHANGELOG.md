@@ -11,10 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Removed
+
+## [0.2.0] - 2024-05-31
+
+### Changed
+
 - Renamed `narrow_access_to_indices` to `narrow_access`.
 - Updated `rayon` version to `1.10` (optional dependency).
-
-### Removed
 
 ## [0.1.0] - 2024-05-22
 
