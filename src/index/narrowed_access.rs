@@ -7,7 +7,7 @@ use std::any::type_name;
 /// An access object that has been narrowed to a subset of its indices.
 ///
 /// This is the result type for
-/// [`narrow_access_to_indices`](crate::index::narrow_access_to_indices).
+/// [`narrow_access`](crate::index::narrow_access).
 ///
 /// TODO: Provide method like `.ensure_in_bounds()` that ensures that
 /// all bounds checks are statically eliminated (currently we rely on

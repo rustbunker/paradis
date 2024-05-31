@@ -94,13 +94,13 @@
 //! described by a list of unique indices? Consider the following code.
 //!
 //! ```rust
-//! use paradis::index::{IndexList, narrow_access_to_indices};
+//! use paradis::index::{IndexList, narrow_access};
 //! use paradis::rayon::create_par_iter;
 //! use rayon::iter::ParallelIterator;
 //!
 //! let mut data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 //! let indices = vec![4, 7, 1].check_unique().expect("Indices are unique");
-//! let access = narrow_access_to_indices(data.as_mut_slice(), &indices)
+//! let access = narrow_access(data.as_mut_slice(), &indices)
 //!     .expect("Indices are in bounds of the data structure");
 //! create_par_iter(access).for_each(|x_i| *x_i = 0);
 //!
@@ -131,7 +131,7 @@
 //!
 //! ```rust
 //! use nalgebra::dmatrix;
-//! use paradis::index::{IndexList, narrow_access_to_indices};
+//! use paradis::index::{IndexList, narrow_access};
 //! use paradis::rayon::create_par_iter;
 //! use rayon::iter::ParallelIterator;
 //!
@@ -145,7 +145,7 @@
 //! // Superdiagonal indices are [(0, 1), (1, 2), (2, 3)]
 //! let superdiagonal_indices = (0 .. 3).index_zip(1 .. 4);
 //! let access = DMatrixParAccessMut::from_matrix_mut(&mut matrix);
-//! let superdiagonal_access = narrow_access_to_indices(access, &superdiagonal_indices)
+//! let superdiagonal_access = narrow_access(access, &superdiagonal_indices)
 //!     .expect("Indices are in bounds");
 //!
 //! create_par_iter(superdiagonal_access).for_each(|x_ij| *x_ij = 0);

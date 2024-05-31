@@ -1,4 +1,4 @@
-use paradis::index::{narrow_access_to_indices, IndexList};
+use paradis::index::{narrow_access, IndexList};
 use paradis::rayon::create_par_iter;
 use paradis_core::{BoundedParAccess, Bounds, ParAccess};
 use rayon::iter::ParallelIterator;
@@ -22,7 +22,7 @@ fn main() {
             .index_product(0..2)
             // Flatten nested tuple to (usize, usize, usize, usize)
             .index_flatten();
-        let access = narrow_access_to_indices(access, &indices).unwrap();
+        let access = narrow_access(access, &indices).unwrap();
         create_par_iter(access).for_each(|a_ijkl| *a_ijkl *= 2);
 
         assert_eq!(
@@ -50,7 +50,7 @@ fn main() {
             .index_flatten();
 
         // Restrict the parallel access to our selected indices
-        let access = narrow_access_to_indices(access, &indices).expect("Indices must be in bounds");
+        let access = narrow_access(access, &indices).expect("Indices must be in bounds");
         create_par_iter(access).for_each(|a_ijkl| *a_ijkl *= 2);
 
         assert_eq!(

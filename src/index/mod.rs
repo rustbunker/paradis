@@ -29,7 +29,7 @@ pub use narrowed_access::NarrowedAccess;
 ///
 /// If indices are not bounded, later accesses made through the
 /// returned access object may panic.
-pub fn narrow_access_to_indices<IntoAccess, Indices>(
+pub fn narrow_access<IntoAccess, Indices>(
     access: IntoAccess,
     indices: &Indices,
 ) -> Result<NarrowedAccess<'_, Indices, IntoAccess::Access>, OutOfBounds>

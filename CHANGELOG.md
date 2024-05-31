@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `narrow_access_to_indices` to `narrow_access`.
+
 ### Removed
 
 ## [0.1.0] - 2024-05-22

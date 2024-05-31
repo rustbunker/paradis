@@ -1,4 +1,4 @@
-use paradis::index::{narrow_access_to_indices, IndexList};
+use paradis::index::{narrow_access, IndexList};
 use paradis::rayon::create_par_iter;
 use rayon::iter::ParallelIterator;
 
@@ -11,7 +11,7 @@ fn main() {
 fn example_with_range() {
     let mut data = vec![1.0; 10000];
     let range = 5..data.len();
-    let access = narrow_access_to_indices(data.as_mut_slice(), &range).unwrap();
+    let access = narrow_access(data.as_mut_slice(), &range).unwrap();
 
     create_par_iter(access).for_each(|x| *x *= 2.0);
 
@@ -25,8 +25,7 @@ fn example_with_checked_indices() {
         .check_unique()
         .expect("All indices unique");
 
-    let access =
-        narrow_access_to_indices(data.as_mut_slice(), &indices).expect("Indices are in bounds");
+    let access = narrow_access(data.as_mut_slice(), &indices).expect("Indices are in bounds");
     create_par_iter(access).for_each(|x| *x *= 2.0);
 
     for (idx, elem) in data.into_iter().enumerate() {
@@ -46,8 +45,7 @@ fn example_with_checked_indices_u32() {
         .expect("All indices unique")
         .index_cast();
 
-    let access =
-        narrow_access_to_indices(data.as_mut_slice(), &indices).expect("indices must be unique");
+    let access = narrow_access(data.as_mut_slice(), &indices).expect("indices must be unique");
     create_par_iter(access).for_each(|x| *x *= 2.0);
 
     for (idx, elem) in data.into_iter().enumerate() {
