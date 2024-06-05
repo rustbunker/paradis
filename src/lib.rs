@@ -17,6 +17,10 @@
 //! Library authors are encouraged to depend only on this crate in order to expose their
 //! data structures for parallel access.
 //!
+//! Please check out the blog post
+//! [Enter paradis — A new chapter in Rust's parallelism story](https://andreaslongva.com/blog/enter-paradis/)
+//! for a discussion of the motivation and ideas behind `paradis`.
+//!
 //! To use `paradis`, add the following to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
